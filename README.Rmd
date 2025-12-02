@@ -1,0 +1,40 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  eval = FALSE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# rpkgdemo
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+This rpkgdemo package serves as a demonstration of how to structure an R package. View the full tutorial in the vignette: `vignette("rpkgdemo")`.
+
+To follow along the full tutorial you'll need the following packages installed:
+
+```{r}
+# TK
+```
+
+
+## Installation
+
+To install rpkgdemo, run:
+
+```{r, eval=FALSE}
+pak::pak("stephenturner/rpkgdemo")
+```
+
+## Example
+

@@ -1,0 +1,30 @@
+Package: rpkgdemo
+Title: A demo package for building R packages
+Version: 0.0.0.9000
+Authors@R: 
+    person("Stephen", "Turner", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-9140-9028"))
+Description: A package to demonstrate building an R package to accompany a
+    workshop on building R packages in Positron. See the getting started
+    vignette for details.
+License: MIT + file LICENSE
+URL: https://github.com/stephenturner/rpkgdemo,
+    https://stephenturner.github.io/rpkgdemo/
+BugReports: https://github.com/stephenturner/rpkgdemo/issues
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: 
+    knitr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports: 
+    dplyr,
+    readr,
+    rlang
+Depends: 
+    R (>= 3.5)
+LazyData: true
+Config/testthat/edition: 3
