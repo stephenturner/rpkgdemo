@@ -1002,31 +1002,77 @@ devtools::test()
 
 Make sure to document, build, and check one last time to ensure everything is working. Notice now when you run a `devtools::check()` it automatically runs all the tests in the package!
 
-# GitHub Actions
-
-# Documentation
-
-## README.Rmd
+# README.Rmd
 
 ```{r}
 usethis::use_readme_rmd()
+devtools::build_readme()
 ```
 
-## pkgdown
 
+# GitHub Actions TK
+
+```{r}
+usethis::use_github_action("check-release")
+```
+
+```
+✔ Setting active project to "/Users/sdt5z/repos/rpkgdemo".
+✔ Creating .github/.
+✔ Adding "^\\.github$" to .Rbuildignore.
+✔ Adding "*.html" to .github/.gitignore.
+✔ Creating .github/workflows/.
+✔ Saving "r-lib/actions/examples/check-release.yaml@v2" to .github/workflows/R-CMD-check.yaml.
+☐ Learn more at <https://github.com/r-lib/actions/blob/v2/examples/README.md>.
+✔ Adding "R-CMD-check badge" to README.Rmd.
+☐ Re-knit README.Rmd with devtools::build_readme().
+> devtools::build_readme()
+ℹ Installing rpkgdemo in temporary library
+ℹ Building /Users/sdt5z/repos/rpkgdemo/README.Rmd
+```
+
+```{r}
+devtools::build_readme()
+```
+
+
+![_GitHub Action for R CMD check_](img/gha-check.png)
+
+
+# pkgdown
 
 
 ```{r}
 usethis::use_pkgdown()
 ```
 
-
 ```{r}
 devtools::build_readme()
+```
+
+```{r}
 pkgdown::build_site()
 ```
 
-## GitHub Actions for pkgdown
+```{r}
+usethis::use_pkgdown_github_pages()
+```
+
+```
+✔ Writing _pkgdown.yml.
+☐ Modify _pkgdown.yml.
+✔ Initializing empty, orphan branch "gh-pages" in GitHub repo "stephenturner/rpkgdemo".
+✔ GitHub Pages is publishing from:
+• URL: "https://stephenturner.github.io/rpkgdemo/"
+• Branch: "gh-pages"
+• Path: "/"
+✔ Saving "r-lib/actions/examples/pkgdown.yaml@v2" to .github/workflows/pkgdown.yaml.
+☐ Learn more at <https://github.com/r-lib/actions/blob/v2/examples/README.md>.
+✔ Recording <https://stephenturner.github.io/rpkgdemo/> as site's url in _pkgdown.yml.
+☐ Run devtools::document() to update package-level documentation.
+✔ Setting <https://stephenturner.github.io/rpkgdemo/> as homepage of GitHub repo "stephenturner/rpkgdemo".
+```
+
 
 # Vignettes
 
