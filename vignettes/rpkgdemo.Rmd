@@ -1002,7 +1002,11 @@ devtools::test()
 
 Make sure to document, build, and check one last time to ensure everything is working. Notice now when you run a `devtools::check()` it automatically runs all the tests in the package!
 
-# GitHub Actions
+# GitHub Actions TK
+
+```{r}
+usethis::use_github_action("check-release")
+```
 
 # Documentation
 
