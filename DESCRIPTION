@@ -1,6 +1,6 @@
 Package: rpkgdemo
 Title: A demo package for building R packages
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Stephen", "Turner", , "first.last@example.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9140-9028"))
@@ -11,20 +11,20 @@ License: MIT + file LICENSE
 URL: https://github.com/stephenturner/rpkgdemo,
     https://stephenturner.github.io/rpkgdemo/
 BugReports: https://github.com/stephenturner/rpkgdemo/issues
+Depends: 
+    R (>= 3.5)
+Imports: 
+    dplyr,
+    readr,
+    rlang
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: 
     knitr
+Config/testthat/edition: 3
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-Imports: 
-    dplyr,
-    readr,
-    rlang
-Depends: 
-    R (>= 3.5)
-LazyData: true
-Config/testthat/edition: 3

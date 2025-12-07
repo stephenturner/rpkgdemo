@@ -19,22 +19,22 @@ library(rpkgdemo)
 library(dplyr)
 ```
 
-# Setup TK
+This vignette demonstrates the core elements of building an R package, suitable for a ~2 hour workshop. The accompanying workshop will demonstrate building an R package using Positron IDE.
 
-TK Positron
+# Setup 
 
-TK Air
+## Positron
 
-TK RStudio keyboard bindings
+To follow along during the live workshop, you'll need to do a few things to get set up.
 
-TK git
+First, you'll need to install [R](https://www.r-project.org/) and [Positron](https://positron.posit.co/). 
 
 To follow along the full tutorial you'll need the following packages installed:
 
 ```{r}
 install.packages(c(
-  "devtools",
   "usethis",
+  "devtools",
   "roxygen2",
   "testthat",
   "knitr",
@@ -48,23 +48,66 @@ install.packages(c(
 ))
 ```
 
-TK
+## Git and GitHub
 
-```{r}
-available::available("yourpackagename")
+You'll also want to make sure git is installed on your system, and that you have a GitHub account set up. I also recommend setting up an SSH key (<https://github.com/settings/keys>) for pushing code to GitHub.
+
+## Air
+
+Optional, but recommended: I like to set up [Air](https://posit-dev.github.io/air/), an R formatter for R written in Rust. This automatically formats your code whenever you save, fixing indentation and spacing issues. Then open up your `settings.json` file from the Command Palette (`Cmd+P`on Mac/Linux, `Ctrl+P` on Windows), then run `Preferences: Open User Settings (JSON)` to modify workspace specific settings, and add this to format on save:
+
+```json
+{
+    "[r]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "Posit.air-vscode"
+    },
+    "[quarto]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "quarto.quarto"
+    }
+}
 ```
 
-TK
+## RStudio keybindings
 
-Start a new directory.
+Optional, but strongly recommended: I like to use the RStudio keyboard shortcuts so I get things like Cmd+Shift+E to run a package check, Cmd+Shift+D to document, Cmd+Shift+B to build. In those user settings:
 
-Create a package.
+```json
+{
+    "workbench.keybindings.rstudioKeybindings": true
+}
+```
+
+# R packages TK
+
+Why
+Benefits
+the loop - edit, document, build, check, commit, push
+
+graphic in mermaid
+
+usethis
+
+# Creating our package
+
+Let's create our package! But before we do, it's useful to check if there are any conflicts with existing packages with the same name, and it'll also check Wikipedia, Wiktionary, and run some simple sentiment analysis to make sure your package name is appropriate.
+
+```{r}
+available::available("rpkgdemo")
+```
+
+I like to use positron to start a new start a new folder, and in that folder create the package with `usethis::create_package()`. So create a new folder somewhere on your system called `rpkgdemo`, open that folder in Positron, and then run the following to create the package:
 
 ```{r}
 usethis::create_package(".")
 ```
 
-Run `devtools::check()`, or cmd+shift+E, or command pallette cmd+shift+P "R: Check R Package".
+Now there are a few one-time things we need to do here before we go any further.
+
+## License
+
+First, let's run a `R CMD check` to see if there are any issues with our package skeleton. Run `devtools::check()` at the console, or cmd+shift+E, or command pallette cmd+shift+P "R: Check R Package".
 
 ```
 W  checking DESCRIPTION meta-information ...
@@ -73,6 +116,7 @@ W  checking DESCRIPTION meta-information ...
      license
 ```
 
+Right away we see that there's an issue with the placeholder created by `usethis::create_package()`. We need to add a proper license. Let's go ahead and add an MIT license with:
 
 ```{r}
 usethis::use_mit_license()
@@ -80,7 +124,7 @@ usethis::use_mit_license()
 
 Edit the `LICENSE` file to add your name.
 
-Check again.
+Run the check again.
 
 ```
 ── R CMD check results ── rpkgdemo 0.0.0.9000 ──
@@ -88,6 +132,10 @@ Duration: 6.2s
 
 0 errors ✔ | 0 warnings ✔ | 0 notes ✔
 ```
+
+## Git
+
+Now let's initialize a git repository for our package, and a corresponding repo on GitHub. You can do this with the Positron Source Control pane, or at the console:
 
 ```sh
 git init
@@ -97,10 +145,15 @@ git remote add origin <your-repo-url>
 git push -u origin main
 ```
 
+Open up the command pallette and run `Developer: Reload window`.
 
-# DESCRIPTION TK
+And take note of your GitHub repo URL. We'll need it shortly.
 
-Before:
+## The `DESCRIPTION` file
+
+The `DESCRIPTION` file is the metadata for your package. It contains information about the package name, version, author, description, license, and dependencies. Let's go ahead and edit this file to add some more information about our package.
+
+This is what it looks like out of the box:
 
 ```
 Package: rpkgdemo
@@ -115,6 +168,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 ```
 
+Let's edit it to look like this (put in your own name, email, package name, etc). Put in the URL of your GitHub repo in the URL field. Go ahead and put in the GitHub pages URL (which we haven't created yet but will later). If your repo url is github.com/username/package, the GitHub pages URL will be username.github.io/package.
 
 ```
 Package: rpkgdemo
@@ -127,15 +181,13 @@ Description: A package to demonstrate building an R package to accompany a
     workshop on building R packages in Positron. See the getting started
     vignette for details.
 License: MIT + file LICENSE
-URL: https://github.com/stephenturner/rpkgdemo,
-    https://stephenturner.github.io/rpkgdemo/
+URL: https://github.com/stephenturner/rpkgdemo, https://stephenturner.github.io/rpkgdemo/
 BugReports: https://github.com/stephenturner/rpkgdemo/issues
 ```
 
-
 # Functions, part 1
 
-TK: process diagram: write function, document, build, test, check, commit, push
+The fundamental building blocks of R packages are functions. Let's add some functions to our package.
 
 ## Our first function: no external dependencies
 
@@ -1135,17 +1187,48 @@ Now whenever you push new changes to main, the pkgdown site will be rebuilt and 
 
 ## Vignettes
 
+You can create a vignette with `usethis::use_vignette()`. This creates a `vignettes/` directory and a template R Markdown file for your vignette. If you name the vignette the same name as your package ("rpkgdemo" here), it will be the main vignette that shows up first in your pkgdown site. Others show up under the "articles" section. See <https://dplyr.tidyverse.org/> for an example.
+
+```{r}
+usethis::use_vignette("rpkgdemo")
+```
+
+## NEWS
+
+You can create a basic `NEWS.md` file with `usethis::use_news_md()`. This also adds a link and new Changelog page in your pkgdown site.
+
+```{r}
+usethis::use_news_md()
+```
+
+## Hex stickers
+
+All packages need a good logo, right? You can make your own here: <https://connect.thinkr.fr/hexmake/>. Once you do that you can add the logo to `./man/figures/logo.png` then add this bit of markdown/HTML the README.Rmd, which will show up in the package README and pkgdown docs:
+
+```
+# rpkgdemo <a href='https://github.com/stephenturner/rpkgdemo'><img src='man/figures/logo.png' align="right" height="200" /></a>
+```
+
 ## R Universe
+
+You can create a CRAN-like repository at <https://r-universe.dev/> by following a few short steps [described here](https://docs.r-universe.dev/publish/set-up.html). Doing this result in the package being built for Windows, Mac, Linux, and WebR, and provides easy installation instructions for users. See the R Universe assets for this package:
+
+- My personal universe: <https://stephenturner.r-universe.dev/>
+- The rpkgdemo package page: <https://stephenturner.r-universe.dev/rpkgdemo>
+- Automatically built PDF manual: <https://stephenturner.r-universe.dev/rpkgdemo/rpkgdemo.pdf>
 
 ## CRAN submission
 
+You might want to submit your package to CRAN. The devools package can help with this. It'll take you through a series of questions and then submit your source package to CRAN. You might want to check out [DavisVaughan/extrachecks](https://github.com/DavisVaughan/extrachecks) for information about additional ad-hoc checks that the CRAN maintainers run that aren't checked by `devtools::check()`. 
+
+```{r}
+devtools::release()
+```
+
 ## Docker & pracpac
 
-## Hex badges
+The `pracpac` package makes it easy to create Docker images for your R packages. You can read more about it in the [paper](https://arxiv.org/abs/2303.07876) and try it out via [CRAN](https://cran.r-project.org/package=pracpac) or [GitHub](https://github.com/signaturescience/pracpac).
 
 ## Additional resources
 
-- [R Packages book](https://r-pkgs.org/)
-- [Advanced R book](https://adv-r.hadley.nz/)
-- [R for Data Science book](https://r4ds.had.co.nz/)
-- [Happy Git and GitHub for the useR](https://happygitwithr.com/)
+Instead of a long list of resources that'll be out of date in a year or two, I'll leave you with one resource: The ***R Packages*** book by Hadley Wickham and Jenny Bryan. It's available online for free at **<https://r-pkgs.org/>**. It's the definitive resource for building R packages.
