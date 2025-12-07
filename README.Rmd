@@ -7,7 +7,6 @@ output: github_document
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  eval = FALSE,
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%"
@@ -24,18 +23,58 @@ This rpkgdemo package serves as a demonstration of how to structure an R package
 
 To follow along the full tutorial you'll need the following packages installed:
 
-```{r}
-# TK
+```{r, eval=FALSE}
+install.packages(c(
+  "devtools",
+  "usethis",
+  "roxygen2",
+  "testthat",
+  "knitr",
+  "rmarkdown",
+  "pkgdown",
+  "available",
+  "dplyr",
+  "janitor",
+  "readxl",
+  "stringr"
+))
 ```
-
 
 ## Installation
 
 To install rpkgdemo, run:
 
 ```{r, eval=FALSE}
-pak::pak("stephenturner/rpkgdemo")
+devtools::install_github("stephenturner/rpkgdemo")
 ```
 
 ## Example
 
+First, let's load the package:
+
+```{r}
+library(rpkgdemo)
+```
+
+Standardize sex variables:
+
+
+```{r}
+standardize_sex(c("Male", "f", "Trans female", "nonbinary", "unknown", NA))
+```
+
+Read in some laboratory data:
+
+```{r}
+fp <- system.file("extdata/rped.csv", package = "rpkgdemo", mustWork = TRUE)
+labdat <- read_labdata(fp)
+labdat
+```
+
+Prepare that data for analysis by annotating with city and state using the zip code, standardizing sex, and normalizing lab values:
+
+```{r}
+prep_lab_data(labdat)
+```
+
+View the full tutorial in the vignette: `vignette("rpkgdemo")`.
