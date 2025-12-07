@@ -97,7 +97,7 @@ read_labdata <- function(file) {
 #' @examples
 #' prep_lab_data(rped)
 #'
-prep_lab_data <- function(x, warnings = TRUE) {
+prep_lab_data <- function(x, warnings = TRUE, badoption="remove") {
   # Check for potential issues
   if (warnings) {
     # Check for bad zip codes

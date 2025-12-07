@@ -1044,7 +1044,7 @@ usethis::use_github_action("check-release")
 
 Taking this a step furtner, you can go into the settings for your GitHub repository, click into the Rules section, and create a new branch protection rule to require (1) pull requests to main, blocking direct pushes to main, and (2) that the R CMD check action passes before allowing a pull request to be merged into main.
 
-
+![_Merging is blocked until the status checks pass_](img/gha-check.png)
 
 # pkgdown
 
