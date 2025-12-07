@@ -1040,11 +1040,22 @@ usethis::use_github_action("check-release")
 ℹ Building /Users/sdt5z/repos/rpkgdemo/README.Rmd
 ```
 
-![_GitHub Action for R CMD check_](img/gha-check.png)
+![_GitHub Action for R CMD check._](img/gha-check.png)
 
 Taking this a step furtner, you can go into the settings for your GitHub repository, click into the Rules section, and create a new branch protection rule to require (1) pull requests to main, blocking direct pushes to main, and (2) that the R CMD check action passes before allowing a pull request to be merged into main.
 
-![_Merging is blocked until the status checks pass_](img/gha-check.png)
+If we were to do something that causes the check to fail, we can't merge into main!
+
+![_Merging is blocked until the status checks pass._](img/gha-checkfail.png)
+
+We can go into the details to see what happened:
+
+![_Details on the package check GitHub action._](img/gha-checkdetails.png)
+
+Once we fix the issue we can merge to main:
+
+![_Merging is allowed once the check succeeds._](img/gha-checkpass.png)
+
 
 # pkgdown
 
