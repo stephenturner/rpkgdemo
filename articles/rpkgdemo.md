@@ -75,13 +75,36 @@ Cmd+Shift+D to document, Cmd+Shift+B to build. In those user settings:
 }
 ```
 
-## R packages TK
+## R packages
 
-Why Benefits the loop - edit, document, build, check, commit, push
+R packages are collections of functions, data, and documentation that
+are bundled together in a standardized structure so they can be
+installed, shared, and reused.
 
-graphic in mermaid
+Writing your own package forces you to organize your code, write
+documentation, and include examples that make your work easier to
+understand and reuse later. Packages make your functions portable,
+installable with a single command, and versioned, which makes it much
+easier to collaborate and to know exactly what code produced a given
+result. Over time, maintaining and extending a package is far easier
+than managing a pile of ad hoc scripts.
 
-usethis
+The basic development cycle for a package is a tight loop. You edit
+code, try it in the console using the development version of your
+package, write or update documentation, and then build and run
+`devtools::check()` to catch errors, warnings, and notes before you
+continue developing or share. You repeat this loop as you add new
+functionality, tests, data, and examples.
+
+![R package development loop](img/devloop.png)
+
+In this tutorial we will make heavy use of the usethis package. usethis
+provides helper functions that automate many of the repetitive tasks in
+package development, such as creating the package skeleton, adding new
+functions, setting up tests, configuring Git and GitHub, and enabling
+pkgdown and continuous integration. By using usethis, you can focus on
+writing good epidemiology and public health code while letting the
+tooling handle most of the boilerplate.
 
 ## Creating our package
 
@@ -1421,3 +1444,42 @@ two, I’ll leave you with one resource: The ***R Packages*** book by
 Hadley Wickham and Jenny Bryan. It’s available online for free at
 **<https://r-pkgs.org/>**. It’s the definitive resource for building R
 packages.
+
+## Session Information
+
+``` r
+sessionInfo()
+#> R version 4.5.2 (2025-10-31)
+#> Platform: x86_64-pc-linux-gnu
+#> Running under: Ubuntu 24.04.3 LTS
+#> 
+#> Matrix products: default
+#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+#> 
+#> locale:
+#>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+#>  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+#>  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+#> [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+#> 
+#> time zone: UTC
+#> tzcode source: system (glibc)
+#> 
+#> attached base packages:
+#> [1] stats     graphics  grDevices utils     datasets  methods   base     
+#> 
+#> other attached packages:
+#> [1] dplyr_1.1.4    rpkgdemo_1.0.0
+#> 
+#> loaded via a namespace (and not attached):
+#>  [1] vctrs_0.6.5       cli_3.6.5         knitr_1.50        rlang_1.1.6      
+#>  [5] xfun_0.54         generics_0.1.4    textshaping_1.0.4 jsonlite_2.0.0   
+#>  [9] glue_1.8.0        htmltools_0.5.9   ragg_1.5.0        sass_0.4.10      
+#> [13] rmarkdown_2.30    tibble_3.3.0      evaluate_1.0.5    jquerylib_0.1.4  
+#> [17] fastmap_1.2.0     yaml_2.3.11       lifecycle_1.0.4   compiler_4.5.2   
+#> [21] fs_1.6.6          pkgconfig_2.0.3   systemfonts_1.3.1 digest_0.6.39    
+#> [25] R6_2.6.1          tidyselect_1.2.1  pillar_1.11.1     magrittr_2.0.4   
+#> [29] bslib_0.9.0       tools_4.5.2       pkgdown_2.2.0     cachem_1.1.0     
+#> [33] desc_1.4.3
+```
