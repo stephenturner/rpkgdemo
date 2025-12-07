@@ -6,6 +6,8 @@
 \alias{rpkgdemo-package}
 \title{rpkgdemo: A demo package for building R packages}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 A package to demonstrate building an R package to accompany a workshop on building R packages in Positron. See the getting started vignette for details.
 }
 \seealso{
