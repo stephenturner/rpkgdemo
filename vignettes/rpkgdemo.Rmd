@@ -178,7 +178,9 @@ Now we need to document our function using special "roxygen comments" so that we
 
 The easiest way to do this is with the Positron Code Action to generate a roxygen skeleton. Place your cursor on the function name and invoke the Code Action by clicking the 💡.
 
-![_Positron Code Action to insert a roxygen skeleton for a function._](img/gen-roxy-template.png)
+```{r, echo=FALSE, eval=TRUE, fig.alt="Positron Code Action to insert a roxygen skeleton for a function"}
+knitr::include_graphics("img/gen-roxy-template.png")
+```
 
 This will result in something that looks like this:
 
@@ -249,7 +251,9 @@ suppress_counts <- function(x, threshold = 5) {
 
 Document and build the package again. Now try `?suppress_counts` to see the help file.
 
-![_Help file for the `suppress_counts` function._](img/suppress-counts-help.png)
+```{r, echo=FALSE, eval=TRUE, fig.alt="Help file for the suppress_counts function"}
+knitr::include_graphics("img/suppress-counts-help.png")
+```
 
 Go ahead and run a check (cmd+shift+E) to make sure everything is working so far.
 
@@ -970,11 +974,16 @@ This time, instead of running `covr::package_coverage()`, let's use the `covr::r
 covr::report()
 ```
 
-![_Coverage report overview_](img/covr-1.png)
+
+```{r, echo=FALSE, eval=TRUE, fig.alt="Coverage report overview"}
+knitr::include_graphics("img/covr-1.png")
+```
 
 If you click on the particular source code file, you can see where you have coverage and where you don't. It's clear from our coverage report that we didn't test the error handling in the `standardize_sex()` function, and we didn't test the remaining functions at all.
 
-![_Coverage report detail_](img/covr-2.png)
+```{r, echo=FALSE, eval=TRUE, fig.alt="Coverage report detail"}
+knitr::include_graphics("img/covr-2.png")
+```
 
 We can continue writing tests until we have 100% coverage, but in real life that's not always feasible. Aim for high coverage, but focus on testing the most important parts of your code. Pro-tip: nearly any Frontier AI model can automate all the tedious parts of writing tests for you. I've had good success with [Positron Assistant](https://blog.stephenturner.us/p/positron-assistant-copilot-chat-agent).
 
@@ -1040,21 +1049,29 @@ usethis::use_github_action("check-release")
 ℹ Building /Users/sdt5z/repos/rpkgdemo/README.Rmd
 ```
 
-![_GitHub Action for R CMD check._](img/gha-check.png)
+```{r, echo=FALSE, eval=TRUE, fig.alt="GitHub Action for R CMD check"}
+knitr::include_graphics("img/gha-check.png")
+```
 
 Taking this a step furtner, you can go into the settings for your GitHub repository, click into the Rules section, and create a new branch protection rule to require (1) pull requests to main, blocking direct pushes to main, and (2) that the R CMD check action passes before allowing a pull request to be merged into main.
 
 If we were to do something that causes the check to fail, we can't merge into main!
 
-![_Merging is blocked until the status checks pass._](img/gha-checkfail.png)
+```{r, echo=FALSE, eval=TRUE, fig.alt="Merging is blocked until the status checks pass"}
+knitr::include_graphics("img/gha-checkfail.png")
+```
 
 We can go into the details to see what happened:
 
-![_Details on the package check GitHub action._](img/gha-checkdetails.png)
+```{r, echo=FALSE, eval=TRUE, fig.alt="Details on the package check GitHub action"}
+knitr::include_graphics("img/gha-checkdetails.png")
+```
 
 Once we fix the issue we can merge to main:
 
-![_Merging is allowed once the check succeeds._](img/gha-checkpass.png)
+```{r, echo=FALSE, eval=TRUE, fig.alt="Merging is allowed once the check succeeds"}
+knitr::include_graphics("img/gha-checkpass.png")
+```
 
 
 # pkgdown

@@ -4,7 +4,7 @@
 \alias{prep_lab_data}
 \title{Prepare lab data}
 \usage{
-prep_lab_data(x, warnings = TRUE, badoption = "remove")
+prep_lab_data(x, warnings = TRUE)
 }
 \arguments{
 \item{x}{A data frame containing lab data with at least \code{sex}, \code{zip}, and lab value columns starting with "lab".}
