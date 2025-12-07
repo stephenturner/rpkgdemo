@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# rpkgdemo
+# rpkgdemo <a href='https://github.com/stephenturner/rpkgdemo'><img src='man/figures/logo.png' align="right" height="200" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/stephenturner/rpkgdemo/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stephenturner/rpkgdemo/actions/workflows/R-CMD-check.yaml)
