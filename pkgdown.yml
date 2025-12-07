@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   rpkgdemo: rpkgdemo.html
-last_built: 2025-12-05T20:39Z
+last_built: 2025-12-07T11:18Z
 urls:
   reference: https://stephenturner.github.io/rpkgdemo/reference
   article: https://stephenturner.github.io/rpkgdemo/articles

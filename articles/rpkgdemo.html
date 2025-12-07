@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>R Package Development with Positron • rpkgdemo</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -49,8 +54,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>R Package Development with Positron</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>R Package Development with Positron</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/stephenturner/rpkgdemo/blob/main/vignettes/rpkgdemo.Rmd" class="external-link"><code>vignettes/rpkgdemo.Rmd</code></a></small>
@@ -192,10 +196,7 @@ so that we can get help on our function with
 <p>The easiest way to do this is with the Positron Code Action to
 generate a roxygen skeleton. Place your cursor on the function name and
 invoke the Code Action by clicking the 💡.</p>
-<div class="float">
-<img src="img/gen-roxy-template.png" alt="Positron Code Action to insert a roxygen skeleton for a function."><div class="figcaption"><em>Positron Code Action to insert a roxygen
-skeleton for a function.</em></div>
-</div>
+<p><img src="img/gen-roxy-template.png" class="r-plt" alt="Positron Code Action to insert a roxygen skeleton for a function"></p>
 <p>This will result in something that looks like this:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#' Title</span></span>
@@ -258,10 +259,7 @@ shortcut cmd+shift+D to run this command.</p>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Document and build the package again. Now try
 <code><a href="../reference/suppress_counts.html">?suppress_counts</a></code> to see the help file.</p>
-<div class="float">
-<img src="img/suppress-counts-help.png" alt="Help file for the suppress_counts function."><div class="figcaption"><em>Help file for the
-<code>suppress_counts</code> function.</em></div>
-</div>
+<p><img src="img/suppress-counts-help.png" class="r-plt" alt="Help file for the suppress_counts function"></p>
 <p>Go ahead and run a check (cmd+shift+E) to make sure everything is
 working so far.</p>
 <pre><code>── R CMD check results ── rpkgdemo 0.0.0.9000 ──
@@ -1005,17 +1003,13 @@ show you which lines of code are covered by your tests and which are
 not.</p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">covr</span><span class="fu">::</span><span class="fu">report</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="img/covr-1.png" alt="Coverage report overview"><div class="figcaption"><em>Coverage report overview</em></div>
-</div>
+<p><img src="img/covr-1.png" class="r-plt" alt="Coverage report overview"></p>
 <p>If you click on the particular source code file, you can see where
 you have coverage and where you don’t. It’s clear from our coverage
 report that we didn’t test the error handling in the
 <code><a href="../reference/standardize_sex.html">standardize_sex()</a></code> function, and we didn’t test the
 remaining functions at all.</p>
-<div class="float">
-<img src="img/covr-2.png" alt="Coverage report detail"><div class="figcaption"><em>Coverage report detail</em></div>
-</div>
+<p><img src="img/covr-2.png" class="r-plt" alt="Coverage report detail"></p>
 <p>We can continue writing tests until we have 100% coverage, but in
 real life that’s not always feasible. Aim for high coverage, but focus
 on testing the most important parts of your code. Pro-tip: nearly any
@@ -1030,7 +1024,7 @@ R/utils.R: 100.00%</code></pre>
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code>ℹ Testing rpkgdemo
 ✔ | F W  S  OK | Context
-✔ |         25 | utils                                                                                                                                                                
+✔ |         25 | utils               
 
 ══ Results ═════════════════==========
 [ FAIL 0 | WARN 0 | SKIP 0 | PASS 25 ]</code></pre>
@@ -1043,14 +1037,36 @@ the package!</p>
 <div class="section level2">
 <h2 id="readme-rmd">README.Rmd<a class="anchor" aria-label="anchor" href="#readme-rmd"></a>
 </h2>
+<p>The README file is the first thing people see when they visit your
+package repository on GitHub. It’s a great place to provide an overview
+of your package, how to install it, and some basic usage examples. You
+can create a README file using R Markdown, which allows you to include
+formatted text, code chunks, and output. You’ll name the file
+<code>README.Rmd</code>, then you can use
+<code>devtools::build_readme()</code> to render it to
+<code>README.md</code>, which is what GitHub displays. To create a
+README.Rmd file, you can use the <code>usethis::use_readme_rmd()</code>
+function.</p>
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_readme_rmd</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">build_readme</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_readme_rmd</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Then use <code>devtools::build_readme()</code> to render it. Besides
+just running knitr to render the file, it installs a temporary copy of
+the package then renders the README.Rmd in a clean session.</p>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">build_readme</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="github-actions-tk">GitHub Actions TK<a class="anchor" aria-label="anchor" href="#github-actions-tk"></a>
+<h2 id="github-actions">GitHub Actions<a class="anchor" aria-label="anchor" href="#github-actions"></a>
 </h2>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<p>GitHub Actions (GHA) allow you to automate workflows for your
+package, such as running tests and package checks, or building
+documentation. The <code>usethis</code> package provides functions to
+set up common GHA workflows for R packages. This will create the
+necessary YAML files in the <code>.github/workflows/</code> directory of
+your package to run a package check whenever (1) you push or merge to
+the main branch, or (2) you open up a pull request to the main branch
+from any development branch.</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_github_action</span><span class="op">(</span><span class="st">"check-release"</span><span class="op">)</span></span></code></pre></div>
 <pre><code>✔ Setting active project to "/Users/sdt5z/repos/rpkgdemo".
 ✔ Creating .github/.
@@ -1064,21 +1080,61 @@ the package!</p>
 &gt; devtools::build_readme()
 ℹ Installing rpkgdemo in temporary library
 ℹ Building /Users/sdt5z/repos/rpkgdemo/README.Rmd</code></pre>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">build_readme</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="img/gha-check.png" alt="GitHub Action for R CMD check"><div class="figcaption"><em>GitHub Action for R CMD check</em></div>
-</div>
+<p><img src="img/gha-check.png" class="r-plt" alt="GitHub Action for R CMD check"></p>
+<p>Taking this a step furtner, you can go into the settings for your
+GitHub repository, click into the Rules section, and create a new branch
+protection rule to require (1) pull requests to main, blocking direct
+pushes to main, and (2) that the R CMD check action passes before
+allowing a pull request to be merged into main.</p>
+<p>If we were to do something that causes the check to fail, we can’t
+merge into main!</p>
+<p><img src="img/gha-checkfail.png" class="r-plt" alt="Merging is blocked until the status checks pass"></p>
+<p>We can go into the details to see what happened:</p>
+<p><img src="img/gha-checkdetails.png" class="r-plt" alt="Details on the package check GitHub action"></p>
+<p>Once we fix the issue we can merge to main:</p>
+<p><img src="img/gha-checkpass.png" class="r-plt" alt="Merging is allowed once the check succeeds"></p>
 </div>
 <div class="section level2">
 <h2 id="pkgdown">pkgdown<a class="anchor" aria-label="anchor" href="#pkgdown"></a>
 </h2>
+<p>The <code>pkgdown</code> package makes it easy to create a website
+for your R package. The website can include function reference,
+vignettes, articles, and more. You can set up <code>pkgdown</code> for
+your package using the <code>usethis::use_pkgdown()</code> function.</p>
 <div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_pkgdown</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Before you render your site, make sure your README is up to date.</p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">build_readme</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Now, you can build the site with <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code>.
+This builds a complete website by rendering the home page from the
+README, function reference from the docs, articles from your vignettes,
+NEWS files, LLM docs, and more.</p>
 <div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">pkgdown</span><span class="fu">::</span><span class="fu"><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">build_site</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>See the pkgdown website for this package:</p>
+<ul>
+<li>Homepage: <a href="https://stephenturner.github.io/rpkgdemo/" class="uri">https://stephenturner.github.io/rpkgdemo/</a>
+</li>
+<li>Vignette (full tutorial): <a href="https://stephenturner.github.io/rpkgdemo/articles/rpkgdemo.html" class="uri">https://stephenturner.github.io/rpkgdemo/articles/rpkgdemo.html</a>
+</li>
+<li>Function reference: <a href="https://stephenturner.github.io/rpkgdemo/reference/index.html" class="uri">https://stephenturner.github.io/rpkgdemo/reference/index.html</a>
+</li>
+</ul>
+<p>The pkgdown package also creates an LLMs.txt at the root of your site
+that contains the contents of your README.md, your reference index, and
+your articles index. It also creates a .md file for every existing .html
+file in your site. Together, this gives an LLM an overview of your
+package and the ability to find out more by following links. For
+example:</p>
+<ul>
+<li><a href="https://stephenturner.github.io/rpkgdemo/llms.txt" class="uri">https://stephenturner.github.io/rpkgdemo/llms.txt</a></li>
+<li><a href="https://stephenturner.github.io/rpkgdemo/articles/rpkgdemo.md" class="uri">https://stephenturner.github.io/rpkgdemo/articles/rpkgdemo.md</a></li>
+<li><a href="https://stephenturner.github.io/rpkgdemo/reference/index.md" class="uri">https://stephenturner.github.io/rpkgdemo/reference/index.md</a></li>
+<li><a href="https://stephenturner.github.io/rpkgdemo/reference/prep_lab_data.md" class="uri">https://stephenturner.github.io/rpkgdemo/reference/prep_lab_data.md</a></li>
+</ul>
+<p>Finally, you can automate the deployment of your pkgdown website with
+yet another GitHub Action: And the vignette here:</p>
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_pkgdown_github_pages</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code>✔ Writing _pkgdown.yml.
@@ -1093,14 +1149,16 @@ the package!</p>
 ✔ Recording &lt;https://stephenturner.github.io/rpkgdemo/&gt; as site's url in _pkgdown.yml.
 ☐ Run devtools::document() to update package-level documentation.
 ✔ Setting &lt;https://stephenturner.github.io/rpkgdemo/&gt; as homepage of GitHub repo "stephenturner/rpkgdemo".</code></pre>
-</div>
-<div class="section level2">
-<h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
-</h2>
+<p>Now whenever you push new changes to main, the pkgdown site will be
+rebuilt and redeployed automatically.</p>
 </div>
 <div class="section level2">
 <h2 id="other-topics">Other topics<a class="anchor" aria-label="anchor" href="#other-topics"></a>
 </h2>
+<div class="section level3">
+<h3 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
+</h3>
+</div>
 <div class="section level3">
 <h3 id="r-universe">R Universe<a class="anchor" aria-label="anchor" href="#r-universe"></a>
 </h3>
@@ -1113,16 +1171,21 @@ the package!</p>
 <h3 id="docker-pracpac">Docker &amp; pracpac<a class="anchor" aria-label="anchor" href="#docker-pracpac"></a>
 </h3>
 </div>
+<div class="section level3">
+<h3 id="hex-badges">Hex badges<a class="anchor" aria-label="anchor" href="#hex-badges"></a>
+</h3>
 </div>
-<div class="section level2">
-<h2 id="additional-resources">Additional resources<a class="anchor" aria-label="anchor" href="#additional-resources"></a>
-</h2>
+<div class="section level3">
+<h3 id="additional-resources">Additional resources<a class="anchor" aria-label="anchor" href="#additional-resources"></a>
+</h3>
 <ul>
 <li><a href="https://r-pkgs.org/" class="external-link">R Packages book</a></li>
+<li><a href="https://adv-r.hadley.nz/" class="external-link">Advanced R book</a></li>
+<li><a href="https://r4ds.had.co.nz/" class="external-link">R for Data Science book</a></li>
 <li><a href="https://happygitwithr.com/" class="external-link">Happy Git and GitHub for the
 useR</a></li>
-<li><a href="https://r4ds.had.co.nz/" class="external-link">R for Data Science book</a></li>
 </ul>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

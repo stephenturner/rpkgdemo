@@ -170,9 +170,7 @@ a roxygen skeleton. Place your cursor on the function name and invoke
 the Code Action by clicking the 💡.
 
 ![Positron Code Action to insert a roxygen skeleton for a
-function.](img/gen-roxy-template.png)
-
-*Positron Code Action to insert a roxygen skeleton for a function.*
+function](img/gen-roxy-template.png)
 
 This will result in something that looks like this:
 
@@ -248,9 +246,7 @@ Document and build the package again. Now try
 to see the help file.
 
 ![Help file for the suppress_counts
-function.](img/suppress-counts-help.png)
-
-*Help file for the `suppress_counts` function.*
+function](img/suppress-counts-help.png)
 
 Go ahead and run a check (cmd+shift+E) to make sure everything is
 working so far.
@@ -1083,8 +1079,6 @@ covr::report()
 
 ![Coverage report overview](img/covr-1.png)
 
-*Coverage report overview*
-
 If you click on the particular source code file, you can see where you
 have coverage and where you don’t. It’s clear from our coverage report
 that we didn’t test the error handling in the
@@ -1092,8 +1086,6 @@ that we didn’t test the error handling in the
 function, and we didn’t test the remaining functions at all.
 
 ![Coverage report detail](img/covr-2.png)
-
-*Coverage report detail*
 
 We can continue writing tests until we have 100% coverage, but in real
 life that’s not always feasible. Aim for high coverage, but focus on
@@ -1115,7 +1107,7 @@ devtools::test()
 
     ℹ Testing rpkgdemo
     ✔ | F W  S  OK | Context
-    ✔ |         25 | utils                                                                                                                                                                
+    ✔ |         25 | utils               
 
     ══ Results ═════════════════==========
     [ FAIL 0 | WARN 0 | SKIP 0 | PASS 25 ]
@@ -1126,12 +1118,36 @@ automatically runs all the tests in the package!
 
 ## README.Rmd
 
+The README file is the first thing people see when they visit your
+package repository on GitHub. It’s a great place to provide an overview
+of your package, how to install it, and some basic usage examples. You
+can create a README file using R Markdown, which allows you to include
+formatted text, code chunks, and output. You’ll name the file
+`README.Rmd`, then you can use `devtools::build_readme()` to render it
+to `README.md`, which is what GitHub displays. To create a README.Rmd
+file, you can use the `usethis::use_readme_rmd()` function.
+
 ``` r
 usethis::use_readme_rmd()
+```
+
+Then use `devtools::build_readme()` to render it. Besides just running
+knitr to render the file, it installs a temporary copy of the package
+then renders the README.Rmd in a clean session.
+
+``` r
 devtools::build_readme()
 ```
 
-## GitHub Actions TK
+## GitHub Actions
+
+GitHub Actions (GHA) allow you to automate workflows for your package,
+such as running tests and package checks, or building documentation. The
+`usethis` package provides functions to set up common GHA workflows for
+R packages. This will create the necessary YAML files in the
+`.github/workflows/` directory of your package to run a package check
+whenever (1) you push or merge to the main branch, or (2) you open up a
+pull request to the main branch from any development branch.
 
 ``` r
 usethis::use_github_action("check-release")
@@ -1150,27 +1166,77 @@ usethis::use_github_action("check-release")
     ℹ Installing rpkgdemo in temporary library
     ℹ Building /Users/sdt5z/repos/rpkgdemo/README.Rmd
 
-``` r
-devtools::build_readme()
-```
-
 ![GitHub Action for R CMD check](img/gha-check.png)
 
-*GitHub Action for R CMD check*
+Taking this a step furtner, you can go into the settings for your GitHub
+repository, click into the Rules section, and create a new branch
+protection rule to require (1) pull requests to main, blocking direct
+pushes to main, and (2) that the R CMD check action passes before
+allowing a pull request to be merged into main.
+
+If we were to do something that causes the check to fail, we can’t merge
+into main!
+
+![Merging is blocked until the status checks
+pass](img/gha-checkfail.png)
+
+We can go into the details to see what happened:
+
+![Details on the package check GitHub action](img/gha-checkdetails.png)
+
+Once we fix the issue we can merge to main:
+
+![Merging is allowed once the check succeeds](img/gha-checkpass.png)
 
 ## pkgdown
+
+The `pkgdown` package makes it easy to create a website for your R
+package. The website can include function reference, vignettes,
+articles, and more. You can set up `pkgdown` for your package using the
+`usethis::use_pkgdown()` function.
 
 ``` r
 usethis::use_pkgdown()
 ```
 
+Before you render your site, make sure your README is up to date.
+
 ``` r
 devtools::build_readme()
 ```
 
+Now, you can build the site with
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html).
+This builds a complete website by rendering the home page from the
+README, function reference from the docs, articles from your vignettes,
+NEWS files, LLM docs, and more.
+
 ``` r
 pkgdown::build_site()
 ```
+
+See the pkgdown website for this package:
+
+- Homepage: <https://stephenturner.github.io/rpkgdemo/>
+- Vignette (full tutorial):
+  <https://stephenturner.github.io/rpkgdemo/articles/rpkgdemo.html>
+- Function reference:
+  <https://stephenturner.github.io/rpkgdemo/reference/index.html>
+
+The pkgdown package also creates an LLMs.txt at the root of your site
+that contains the contents of your README.md, your reference index, and
+your articles index. It also creates a .md file for every existing .html
+file in your site. Together, this gives an LLM an overview of your
+package and the ability to find out more by following links. For
+example:
+
+- <https://stephenturner.github.io/rpkgdemo/llms.txt>
+- <https://stephenturner.github.io/rpkgdemo/articles/rpkgdemo.md>
+- <https://stephenturner.github.io/rpkgdemo/reference/index.md>
+- <https://stephenturner.github.io/rpkgdemo/reference/prep_lab_data.md>
+
+Finally, you can automate the deployment of your pkgdown website with
+yet another GitHub Action: And the vignette here:
 
 ``` r
 usethis::use_pkgdown_github_pages()
@@ -1189,9 +1255,12 @@ usethis::use_pkgdown_github_pages()
     ☐ Run devtools::document() to update package-level documentation.
     ✔ Setting <https://stephenturner.github.io/rpkgdemo/> as homepage of GitHub repo "stephenturner/rpkgdemo".
 
-## Vignettes
+Now whenever you push new changes to main, the pkgdown site will be
+rebuilt and redeployed automatically.
 
 ## Other topics
+
+### Vignettes
 
 ### R Universe
 
@@ -1199,8 +1268,11 @@ usethis::use_pkgdown_github_pages()
 
 ### Docker & pracpac
 
-## Additional resources
+### Hex badges
+
+### Additional resources
 
 - [R Packages book](https://r-pkgs.org/)
-- [Happy Git and GitHub for the useR](https://happygitwithr.com/)
+- [Advanced R book](https://adv-r.hadley.nz/)
 - [R for Data Science book](https://r4ds.had.co.nz/)
+- [Happy Git and GitHub for the useR](https://happygitwithr.com/)
