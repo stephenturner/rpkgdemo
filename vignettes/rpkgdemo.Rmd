@@ -79,15 +79,20 @@ Optional, but strongly recommended: I like to use the RStudio keyboard shortcuts
 }
 ```
 
-# R packages TK
+# R packages
 
-Why
-Benefits
-the loop - edit, document, build, check, commit, push
+R packages are collections of functions, data, and documentation that are bundled together in a standardized structure so they can be installed, shared, and reused.
 
-graphic in mermaid
+Writing your own package forces you to organize your code, write documentation, and include examples that make your work easier to understand and reuse later. Packages make your functions portable, installable with a single command, and versioned, which makes it much easier to collaborate and to know exactly what code produced a given result. Over time, maintaining and extending a package is far easier than managing a pile of ad hoc scripts.
 
-usethis
+The basic development cycle for a package is a tight loop. You edit code, try it in the console using the development version of your package, write or update documentation, and then build and run `devtools::check()` to catch errors, warnings, and notes before you continue developing or share. You repeat this loop as you add new functionality, tests, data, and examples.
+
+```{r, echo=FALSE, eval=TRUE, fig.alt="R package development loop"}
+knitr::include_graphics("img/devloop.png")
+```
+
+
+In this tutorial we will make heavy use of the usethis package. usethis provides helper functions that automate many of the repetitive tasks in package development, such as creating the package skeleton, adding new functions, setting up tests, configuring Git and GitHub, and enabling pkgdown and continuous integration. By using usethis, you can focus on writing good epidemiology and public health code while letting the tooling handle most of the boilerplate.
 
 # Creating our package
 
@@ -1232,3 +1237,9 @@ The `pracpac` package makes it easy to create Docker images for your R packages.
 ## Additional resources
 
 Instead of a long list of resources that'll be out of date in a year or two, I'll leave you with one resource: The ***R Packages*** book by Hadley Wickham and Jenny Bryan. It's available online for free at **<https://r-pkgs.org/>**. It's the definitive resource for building R packages.
+
+# Session Information
+
+```{r, echo=TRUE, eval=TRUE}
+sessionInfo()
+```
