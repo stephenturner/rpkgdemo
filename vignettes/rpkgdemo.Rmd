@@ -44,7 +44,10 @@ install.packages(c(
   "dplyr",
   "janitor",
   "readxl",
-  "stringr"
+  "stringr",
+  "covr", 
+  "DT", 
+  "htmltools"
 ))
 ```
 
