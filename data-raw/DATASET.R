@@ -84,3 +84,10 @@ usethis::use_data(rped, overwrite = TRUE)
 extdatadir <- here::here("inst/extdata")
 dir.create(extdatadir, recursive = TRUE)
 readr::write_csv(rped, here::here("inst/extdata/rped.csv"))
+
+
+# harmonize race ---------------------------------------------------------
+
+racemap <- readr::read_csv(here::here("data-raw/racemap.csv"), col_types = "cc")
+racemap <- tibble::deframe(racemap)
+usethis::use_data(racemap, overwrite = TRUE)

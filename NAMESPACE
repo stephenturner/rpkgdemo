@@ -2,6 +2,7 @@
 
 export(prep_lab_data)
 export(read_labdata)
+export(standardize_race)
 export(standardize_sex)
 export(suppress_counts)
 importFrom(rlang,.data)

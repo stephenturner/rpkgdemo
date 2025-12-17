@@ -59,6 +59,33 @@ standardize_sex <- function(x) {
   return(standardized)
 }
 
+
+#' Standardize race variable
+#'
+#' @param x A data frame containing a race column to harmonize
+#' @param racecol The name of the race column. Default is "race".
+#'
+#' @returns A new data frame with an additional `.race_standardized` column
+#' @export
+#'
+#' @seealso racemap
+#'
+#' @examples
+#' set.seed(123)
+#' mydata <- data.frame(reported_race=sample(names(racemap), 20, replace=TRUE))
+#' mydata$reported_race[15] <- "Martian"
+#' mydata
+#' standardize_race(mydata, racecol="reported_race")
+#'
+standardize_race <- function(x, racecol = "race") {
+  if (!racecol %in% names(x)) {
+    stop(paste("Column", racecol, "not found in data"))
+  }
+  x$.race_standardized <- rpkgdemo::racemap[x[[racecol]]]
+  return(x)
+}
+
+
 #' Read laboratory data
 #'
 #' Read laboratory data from a file
