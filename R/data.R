@@ -30,3 +30,18 @@
 #' rped
 #'
 "rped"
+
+#' Race mapping
+#'
+#' A named character vector mapping various race categories to a harmonized variable
+#'
+#' @format A named character vector.
+#'
+#' @examples
+#' racemap
+#' racemap["AI/AN"]
+#' racemap["Black"]
+#' racemap["Doesn't exist in the mapping"]
+#' table(racemap)
+#'
+"racemap"

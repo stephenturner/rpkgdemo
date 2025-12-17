@@ -89,3 +89,72 @@ test_that("prep_lab_data standardizes sex variable", {
   )
   expect_no_warning(prep_lab_data(test_data, warnings = FALSE))
 })
+
+
+# tests/testthat/test-utils.R
+
+# Test standardize_race ----
+test_that("standardize_race", {
+  # standardize_race adds .race_standardized column
+  test_data <- data.frame(
+    race = c("White", "Black", "Asian"),
+    other_col = c(1, 2, 3)
+  )
+  result <- standardize_race(test_data)
+  expect_true(".race_standardized" %in% names(result))
+  expect_equal(ncol(result), 3)
+
+  # standardize_race works with custom column name
+  test_data <- data.frame(
+    reported_race = c("White", "Black", "Asian"),
+    other_col = c(1, 2, 3)
+  )
+  result <- standardize_race(test_data, racecol = "reported_race")
+  expect_true(".race_standardized" %in% names(result))
+
+  # standardize_race uses racemap correctly
+  test_data <- data.frame(
+    race = names(rpkgdemo::racemap)[1:3]
+  )
+  result <- standardize_race(test_data)
+  expect_equal(
+    result$.race_standardized,
+    unname(rpkgdemo::racemap[names(rpkgdemo::racemap)[1:3]])
+  )
+
+  # standardize_race handles unmapped values with NA
+  test_data <- data.frame(
+    race = c("White", "Martian", "Klingon")
+  )
+  result <- standardize_race(test_data)
+  expect_true(is.na(result$.race_standardized[2]))
+  expect_true(is.na(result$.race_standardized[3]))
+  # standardize_race throws error when column not found
+  test_data <- data.frame(
+    other_col = c(1, 2, 3)
+  )
+  expect_error(
+    standardize_race(test_data),
+    "Column race not found in data"
+  )
+
+  # standardize_race throws error with custom column not found
+  test_data <- data.frame(
+    race = c("White", "Black")
+  )
+  expect_error(
+    standardize_race(test_data, racecol = "nonexistent"),
+    "Column nonexistent not found in data"
+  )
+
+  # standardize_race preserves original columns
+  test_data <- data.frame(
+    race = c("White", "Black"),
+    id = c(1, 2),
+    value = c(10, 20)
+  )
+  result <- standardize_race(test_data)
+  expect_equal(result$race, test_data$race)
+  expect_equal(result$id, test_data$id)
+  expect_equal(result$value, test_data$value)
+})
