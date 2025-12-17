@@ -68,7 +68,7 @@ standardize_sex <- function(x) {
 #' @returns A new data frame with an additional `.race_standardized` column
 #' @export
 #'
-#' @seealso racemap
+#' @seealso [racemap]
 #'
 #' @examples
 #' set.seed(123)

@@ -26,5 +26,5 @@ standardize_race(mydata, racecol="reported_race")
 
 }
 \seealso{
-racemap
+\link{racemap}
 }
