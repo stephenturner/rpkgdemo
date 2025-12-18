@@ -16,8 +16,8 @@ installed:
 
 ``` r
 install.packages(c(
-  "devtools",
   "usethis",
+  "devtools",
   "roxygen2",
   "testthat",
   "knitr",
@@ -27,7 +27,11 @@ install.packages(c(
   "dplyr",
   "janitor",
   "readxl",
-  "stringr"
+  "stringr",
+  "covr",
+  "DT",
+  "htmltools",
+  "here"
 ))
 ```
 
