@@ -45,9 +45,9 @@ install.packages(c(
   "janitor",
   "readxl",
   "stringr",
-  "covr", 
-  "DT", 
-  "htmltools", 
+  "covr",
+  "DT",
+  "htmltools",
   "here"
 ))
 ```
@@ -829,7 +829,7 @@ Note here that the example uses `system.file()` to get the path to the installed
 
 Oops -- we have a warning. We forgot to import the `readr` package!
 
-```{r}
+```
 ── R CMD check results ── rpkgdemo 0.0.0.9000 ──
 Duration: 13.7s
 
@@ -862,10 +862,10 @@ Let's add another function that uses piped dplyr code with data masking. Here's 
 #'
 #' @returns A data frame with standardized `sex`, joined `zipcodes`, and scaled lab values.
 #' @export
-#' 
+#'
 #' @examples
 #' prep_lab_data(rped)
-#' 
+#'
 prep_lab_data <- function(x) {
   x |>
     dplyr::mutate(sex = standardize_sex(sex)) |>
@@ -1097,7 +1097,7 @@ But now we're tangling the logic of the function (`mutate` and `case_when` for r
 First, create a CSV file that looks something like this. We have `orace` ("original race") and `hrace` ("harmonized race").
 
 ```{r}
-read.csv(here::here("data-raw/racemap.csv")) |> 
+read.csv(here::here("data-raw/racemap.csv")) |>
   knitr::kable()
 ```
 
@@ -1174,13 +1174,15 @@ Document, rebuild, check, then try it out.
 ```{r, eval=TRUE}
 # Generate some fake data
 set.seed(123)
-mydata <- tibble::tibble(reported_race=sample(names(racemap), 20, replace=TRUE))
+mydata <- tibble::tibble(
+  reported_race = sample(names(racemap), 20, replace = TRUE)
+)
 mydata$reported_race[15] <- "Martian"
 mydata
 
 # Now standardize that race data
-mydata |> 
-  standardize_race(racecol="reported_race")
+mydata |>
+  standardize_race(racecol = "reported_race")
 ```
 
 Finally, we can write some tests for this function. These tests were written wholly by Positron Assitant using Claude Sonnet 4.5.
