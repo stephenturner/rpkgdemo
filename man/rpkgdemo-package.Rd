@@ -20,7 +20,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Stephen Turner \email{first.last@example.com} (\href{https://orcid.org/0000-0001-9140-9028}{ORCID})
+\strong{Maintainer}: Stephen Turner \email{vustephen@gmail.com} (\href{https://orcid.org/0000-0001-9140-9028}{ORCID})
 
 }
 \keyword{internal}

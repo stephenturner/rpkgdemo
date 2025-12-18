@@ -2,7 +2,7 @@ Package: rpkgdemo
 Title: A demo package for building R packages
 Version: 1.0.0
 Authors@R: 
-    person("Stephen", "Turner", , "first.last@example.com", role = c("aut", "cre"),
+    person("Stephen", "Turner", , "vustephen@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9140-9028"))
 Description: A package to demonstrate building an R package to accompany a
     workshop on building R packages in Positron. See the getting started
@@ -20,7 +20,8 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tibble
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3
