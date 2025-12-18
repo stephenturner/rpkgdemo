@@ -92,9 +92,9 @@ installed:</p>
 <span>  <span class="st">"janitor"</span>,</span>
 <span>  <span class="st">"readxl"</span>,</span>
 <span>  <span class="st">"stringr"</span>,</span>
-<span>  <span class="st">"covr"</span>, </span>
-<span>  <span class="st">"DT"</span>, </span>
-<span>  <span class="st">"htmltools"</span>, </span>
+<span>  <span class="st">"covr"</span>,</span>
+<span>  <span class="st">"DT"</span>,</span>
+<span>  <span class="st">"htmltools"</span>,</span>
 <span>  <span class="st">"here"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -904,15 +904,15 @@ path to the installed raw data file we created earlier. Document, build,
 check.</p>
 <p>Oops – we have a warning. We forgot to import the <code>readr</code>
 package!</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>── R CMD check results ── rpkgdemo <span class="dv">0</span>.<span class="dv">0</span>.<span class="fl">0.9000</span> ──</span>
-<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a>Duration<span class="sc">:</span> <span class="fl">13.7</span>s</span>
-<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a></span>
-<span id="cb44-4"><a href="#cb44-4" tabindex="-1"></a>❯ checking dependencies <span class="cf">in</span> R code ... WARNING</span>
-<span id="cb44-5"><a href="#cb44-5" tabindex="-1"></a>  <span class="st">'::'</span> or <span class="st">':::'</span> import not declared from<span class="sc">:</span> ‘readr’</span>
-<span id="cb44-6"><a href="#cb44-6" tabindex="-1"></a></span>
-<span id="cb44-7"><a href="#cb44-7" tabindex="-1"></a><span class="dv">0</span> errors ✔ <span class="sc">|</span> <span class="dv">1</span> warning ✖ <span class="sc">|</span> <span class="dv">0</span> notes ✔</span>
-<span id="cb44-8"><a href="#cb44-8" tabindex="-1"></a>Error<span class="sc">:</span> R CMD check found WARNINGs</span>
-<span id="cb44-9"><a href="#cb44-9" tabindex="-1"></a>Execution halted</span></code></pre></div>
+<pre><code>── R CMD check results ── rpkgdemo 0.0.0.9000 ──
+Duration: 13.7s
+
+❯ checking dependencies in R code ... WARNING
+  '::' or ':::' import not declared from: ‘readr’
+
+0 errors ✔ | 1 warning ✖ | 0 notes ✔
+Error: R CMD check found WARNINGs
+Execution halted</code></pre>
 <p>Add it to the <code>Imports</code> in <code>DESCRIPTION</code> with
 usethis:</p>
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
@@ -936,10 +936,10 @@ values.</p>
 <span><span class="co">#'</span></span>
 <span><span class="co">#' @returns A data frame with standardized `sex`, joined `zipcodes`, and scaled lab values.</span></span>
 <span><span class="co">#' @export</span></span>
-<span><span class="co">#' </span></span>
+<span><span class="co">#'</span></span>
 <span><span class="co">#' @examples</span></span>
 <span><span class="co">#' prep_lab_data(rped)</span></span>
-<span><span class="co">#' </span></span>
+<span><span class="co">#'</span></span>
 <span><span class="va">prep_lab_data</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sex <span class="op">=</span> <span class="fu"><a href="../reference/standardize_sex.html">standardize_sex</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1195,7 +1195,7 @@ from that internal data to do the harmonization. Let’s do that.</p>
 <code>orace</code> (“original race”) and <code>hrace</code> (“harmonized
 race”).</p>
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu">here</span><span class="op">(</span><span class="st">"data-raw/racemap.csv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu">here</span><span class="op">(</span><span class="st">"data-raw/racemap.csv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Now, save this CSV file in <code>data-raw/</code>.</p>
 <p>In <code>data-raw/DATASET.R</code>, add code to read in this CSV file
@@ -1323,7 +1323,9 @@ to avoid overwriting an existing variable that might be called
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate some fake data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">mydata</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>reported_race<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">racemap</span><span class="op">)</span>, <span class="fl">20</span>, replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mydata</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  reported_race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">racemap</span><span class="op">)</span>, <span class="fl">20</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span><span class="va">mydata</span><span class="op">$</span><span class="va">reported_race</span><span class="op">[</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"Martian"</span></span>
 <span><span class="va">mydata</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20 × 1</span></span></span>
@@ -1351,8 +1353,8 @@ to avoid overwriting an existing variable that might be called
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">20</span> R1</span></span>
 <span></span>
 <span><span class="co"># Now standardize that race data</span></span>
-<span><span class="va">mydata</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span>racecol<span class="op">=</span><span class="st">"reported_race"</span><span class="op">)</span></span>
+<span><span class="va">mydata</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span>racecol <span class="op">=</span> <span class="st">"reported_race"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20 × 2</span></span></span>
 <span><span class="co">#&gt;    reported_race                          .race_standardized                    </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                 </span></span>

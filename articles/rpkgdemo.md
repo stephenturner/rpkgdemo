@@ -31,9 +31,9 @@ install.packages(c(
   "janitor",
   "readxl",
   "stringr",
-  "covr", 
-  "DT", 
-  "htmltools", 
+  "covr",
+  "DT",
+  "htmltools",
   "here"
 ))
 ```
@@ -949,17 +949,15 @@ check.
 
 Oops – we have a warning. We forgot to import the `readr` package!
 
-``` r
-── R CMD check results ── rpkgdemo 0.0.0.9000 ──
-Duration: 13.7s
+    ── R CMD check results ── rpkgdemo 0.0.0.9000 ──
+    Duration: 13.7s
 
-❯ checking dependencies in R code ... WARNING
-  '::' or ':::' import not declared from: ‘readr’
+    ❯ checking dependencies in R code ... WARNING
+      '::' or ':::' import not declared from: ‘readr’
 
-0 errors ✔ | 1 warning ✖ | 0 notes ✔
-Error: R CMD check found WARNINGs
-Execution halted
-```
+    0 errors ✔ | 1 warning ✖ | 0 notes ✔
+    Error: R CMD check found WARNINGs
+    Execution halted
 
 Add it to the `Imports` in `DESCRIPTION` with usethis:
 
@@ -985,10 +983,10 @@ data, and centers and scales lab values.
 #'
 #' @returns A data frame with standardized `sex`, joined `zipcodes`, and scaled lab values.
 #' @export
-#' 
+#'
 #' @examples
 #' prep_lab_data(rped)
-#' 
+#'
 prep_lab_data <- function(x) {
   x |>
     dplyr::mutate(sex = standardize_sex(sex)) |>
@@ -1277,7 +1275,7 @@ First, create a CSV file that looks something like this. We have `orace`
 (“original race”) and `hrace` (“harmonized race”).
 
 ``` r
-read.csv(here::here("data-raw/racemap.csv")) |> 
+read.csv(here::here("data-raw/racemap.csv")) |>
   knitr::kable()
 ```
 
@@ -1421,7 +1419,9 @@ Document, rebuild, check, then try it out.
 ``` r
 # Generate some fake data
 set.seed(123)
-mydata <- tibble::tibble(reported_race=sample(names(racemap), 20, replace=TRUE))
+mydata <- tibble::tibble(
+  reported_race = sample(names(racemap), 20, replace = TRUE)
+)
 mydata$reported_race[15] <- "Martian"
 mydata
 #> # A tibble: 20 × 1
@@ -1449,8 +1449,8 @@ mydata
 #> 20 R1
 
 # Now standardize that race data
-mydata |> 
-  standardize_race(racecol="reported_race")
+mydata |>
+  standardize_race(racecol = "reported_race")
 #> # A tibble: 20 × 2
 #>    reported_race                          .race_standardized                    
 #>    <chr>                                  <chr>                                 
