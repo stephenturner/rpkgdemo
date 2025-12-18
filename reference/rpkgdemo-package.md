@@ -16,5 +16,5 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Stephen Turner <first.last@example.com>
+**Maintainer**: Stephen Turner <vustephen@gmail.com>
 ([ORCID](https://orcid.org/0000-0001-9140-9028))

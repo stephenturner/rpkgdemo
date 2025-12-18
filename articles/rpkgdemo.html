@@ -94,7 +94,8 @@ installed:</p>
 <span>  <span class="st">"stringr"</span>,</span>
 <span>  <span class="st">"covr"</span>, </span>
 <span>  <span class="st">"DT"</span>, </span>
-<span>  <span class="st">"htmltools"</span></span>
+<span>  <span class="st">"htmltools"</span>, </span>
+<span>  <span class="st">"here"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -221,6 +222,16 @@ Control pane, or at the console:</p>
 <p>Open up the command pallette and run
 <code>Developer: Reload window</code>.</p>
 <p>And take note of your GitHub repo URL. We’ll need it shortly.</p>
+<p>A note about <code>.gitignore</code>: You can create one yourself, or
+use <code>usethis::git_vaccinate()</code>, which adds
+<code>.Rproj.user</code>, <code>.Rhistory</code>, <code>.Rdata</code>,
+<code>.httr-oauth</code>, <code>.DS_Store</code>, and
+<code>.quarto</code> to your global (a.k.a. user-level)
+<code>.gitignore</code>. This is good practice as it decreases the
+chance that you will accidentally leak credentials to GitHub.
+git_vaccinate() also tries to detect and fix the situation where you
+have a global gitignore file, but it’s missing from your global Git
+config.</p>
 </div>
 <div class="section level3">
 <h3 id="the-description-file">The <code>DESCRIPTION</code> file<a class="anchor" aria-label="anchor" href="#the-description-file"></a>
@@ -1151,6 +1162,309 @@ the package!</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="recap-data-functions-tests">Recap: data + functions + tests<a class="anchor" aria-label="anchor" href="#recap-data-functions-tests"></a>
+</h2>
+<p>Let’s put together everything we’ve done so far to (1) create a
+function that (2) relies on internal package data that’s (3) built from
+<code>data-raw</code> using a script.</p>
+<p>Imagine we want to to create a function to harmonize different
+representations of race or ethnicity up to a smaller set of broad
+categories. E.g., “Black/African American,” “Black,” and “Black or
+African American” all rolled up to “Black/African American”; or “Native
+Hawaiian/Other Pacific Islander,” “NH/PI,” or “Native Hawaiian/Pacific
+Islander” up to “Native Hawaiian/Other Pacific Islander.” We could
+construct some complex function for this:</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    race_harmonized <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>      <span class="va">.data</span><span class="op">$</span><span class="va">race</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"abc"</span>, <span class="st">"def"</span>, <span class="st">"ghi"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"harmonized category 1"</span>,</span>
+<span>      <span class="va">.data</span><span class="op">$</span><span class="va">race</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"jkl"</span>, <span class="st">"mno"</span>, <span class="st">"pqr"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"harmonized category 2"</span>,</span>
+<span>      <span class="va">.data</span><span class="op">$</span><span class="va">race</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stu"</span>, <span class="st">"vwx"</span>, <span class="st">"yz1"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"harmonized category 3"</span>,</span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>But now we’re tangling the logic of the function (<code>mutate</code>
+and <code>case_when</code> for recoding) with the actual data (the
+various representations of race entries and their corresponding rolled
+up high level class). And, perhaps we want to update this mapping over
+time as we encounter new representations. A better way to do this is to
+create a CSV file in <code>data-raw/</code> that contains the mapping,
+read that into the package as internal data, then have the function read
+from that internal data to do the harmonization. Let’s do that.</p>
+<p>First, create a CSV file that looks something like this. We have
+<code>orace</code> (“original race”) and <code>hrace</code> (“harmonized
+race”).</p>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu">here</span><span class="op">(</span><span class="st">"data-raw/racemap.csv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Now, save this CSV file in <code>data-raw/</code>.</p>
+<p>In <code>data-raw/DATASET.R</code>, add code to read in this CSV file
+and save it as internal data in the package.</p>
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">racemap</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu">here</span><span class="op">(</span><span class="st">"data-raw/racemap.csv"</span><span class="op">)</span>, col_types <span class="op">=</span> <span class="st">"cc"</span><span class="op">)</span></span>
+<span><span class="va">racemap</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/enframe.html" class="external-link">deframe</a></span><span class="op">(</span><span class="va">racemap</span><span class="op">)</span></span>
+<span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_data</span><span class="op">(</span><span class="va">racemap</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>And document it in <code>R/data.R</code>:</p>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#' Race mapping</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' A named character vector mapping various race categories to a harmonized variable</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @format A named character vector.</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @examples</span></span>
+<span><span class="co">#' racemap</span></span>
+<span><span class="co">#' racemap["AI/AN"]</span></span>
+<span><span class="co">#' racemap["Black"]</span></span>
+<span><span class="co">#' racemap["Doesn't exist in the mapping"]</span></span>
+<span><span class="co">#' table(racemap)</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="st">"racemap"</span></span></code></pre></div>
+<p>Take a look at that object. It’s a named character vector.</p>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">racemap</span></span>
+<span><span class="co">#&gt;            American Indian/Alaska Native </span></span>
+<span><span class="co">#&gt;          "American Indian/Alaska Native" </span></span>
+<span><span class="co">#&gt;                                    AI/AN </span></span>
+<span><span class="co">#&gt;          "American Indian/Alaska Native" </span></span>
+<span><span class="co">#&gt;           Native American/Alaskan Native </span></span>
+<span><span class="co">#&gt;          "American Indian/Alaska Native" </span></span>
+<span><span class="co">#&gt;                                       R1 </span></span>
+<span><span class="co">#&gt;          "American Indian/Alaska Native" </span></span>
+<span><span class="co">#&gt;                                    Asian </span></span>
+<span><span class="co">#&gt;                                  "Asian" </span></span>
+<span><span class="co">#&gt;                                       R2 </span></span>
+<span><span class="co">#&gt;                                  "Asian" </span></span>
+<span><span class="co">#&gt;                   Black/African American </span></span>
+<span><span class="co">#&gt;                 "Black/African American" </span></span>
+<span><span class="co">#&gt;                                    Black </span></span>
+<span><span class="co">#&gt;                 "Black/African American" </span></span>
+<span><span class="co">#&gt;                Black or African American </span></span>
+<span><span class="co">#&gt;                 "Black/African American" </span></span>
+<span><span class="co">#&gt;                                       R3 </span></span>
+<span><span class="co">#&gt;                 "Black/African American" </span></span>
+<span><span class="co">#&gt;   Native Hawaiian/Other Pacific Islander </span></span>
+<span><span class="co">#&gt; "Native Hawaiian/Other Pacific Islander" </span></span>
+<span><span class="co">#&gt;                                    NH/PI </span></span>
+<span><span class="co">#&gt; "Native Hawaiian/Other Pacific Islander" </span></span>
+<span><span class="co">#&gt;         Native Hawaiian/Pacific Islander </span></span>
+<span><span class="co">#&gt; "Native Hawaiian/Other Pacific Islander" </span></span>
+<span><span class="co">#&gt;                                       R4 </span></span>
+<span><span class="co">#&gt; "Native Hawaiian/Other Pacific Islander" </span></span>
+<span><span class="co">#&gt;                                    White </span></span>
+<span><span class="co">#&gt;                                  "White" </span></span>
+<span><span class="co">#&gt;                                       R5 </span></span>
+<span><span class="co">#&gt;                                  "White" </span></span>
+<span><span class="co">#&gt;                                  Unknown </span></span>
+<span><span class="co">#&gt;                                "Unknown" </span></span>
+<span><span class="co">#&gt;                                      UNK </span></span>
+<span><span class="co">#&gt;                                "Unknown" </span></span>
+<span><span class="co">#&gt;                                    Other </span></span>
+<span><span class="co">#&gt;                                  "Other" </span></span>
+<span><span class="co">#&gt;                       More Than One Race </span></span>
+<span><span class="co">#&gt;                            "Multiracial" </span></span>
+<span><span class="co">#&gt;                               Multi-race </span></span>
+<span><span class="co">#&gt;                            "Multiracial"</span></span>
+<span><span class="va">racemap</span><span class="op">[</span><span class="st">"AI/AN"</span><span class="op">]</span></span>
+<span><span class="co">#&gt;                           AI/AN </span></span>
+<span><span class="co">#&gt; "American Indian/Alaska Native"</span></span>
+<span><span class="va">racemap</span><span class="op">[</span><span class="st">"Black"</span><span class="op">]</span></span>
+<span><span class="co">#&gt;                    Black </span></span>
+<span><span class="co">#&gt; "Black/African American"</span></span>
+<span><span class="va">racemap</span><span class="op">[</span><span class="st">"Doesn't exist in the mapping"</span><span class="op">]</span></span>
+<span><span class="co">#&gt; &lt;NA&gt; </span></span>
+<span><span class="co">#&gt;   NA</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">racemap</span><span class="op">)</span></span>
+<span><span class="co">#&gt; racemap</span></span>
+<span><span class="co">#&gt;          American Indian/Alaska Native                                  Asian </span></span>
+<span><span class="co">#&gt;                                      4                                      2 </span></span>
+<span><span class="co">#&gt;                 Black/African American                            Multiracial </span></span>
+<span><span class="co">#&gt;                                      4                                      2 </span></span>
+<span><span class="co">#&gt; Native Hawaiian/Other Pacific Islander                                  Other </span></span>
+<span><span class="co">#&gt;                                      4                                      1 </span></span>
+<span><span class="co">#&gt;                                Unknown                                  White </span></span>
+<span><span class="co">#&gt;                                      2                                      2</span></span></code></pre></div>
+<p>Now we can write a function that harmonizes a race variable in a data
+frame in <code>R/utils.R</code>. Notice how we reference the
+<code>racemap</code> object from the package namespace with
+<code><a href="../reference/racemap.html">rpkgdemo::racemap</a></code>, and we’re simply using that named vector
+to do the harmonization. We pass the data frame to the function along
+with the name of the original race columnn in the data frame. The
+function adds a new column called <code>.race_standardized</code>.
+Prefixing variables added by functions with a dot is a common convention
+to avoid overwriting an existing variable that might be called
+<code>race_standardized</code>.</p>
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#' Standardize race variable</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @param x A data frame containing a race column to harmonize</span></span>
+<span><span class="co">#' @param racecol The name of the race column. Default is "race".</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @returns A new data frame with an additional `.race_standardized` column</span></span>
+<span><span class="co">#' @export</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @seealso [racemap]</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @examples</span></span>
+<span><span class="co">#' set.seed(123)</span></span>
+<span><span class="co">#' mydata &lt;- data.frame(reported_race=sample(names(racemap), 20, replace=TRUE))</span></span>
+<span><span class="co">#' mydata$reported_race[15] &lt;- "Martian"</span></span>
+<span><span class="co">#' mydata</span></span>
+<span><span class="co">#' standardize_race(mydata, racecol="reported_race")</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="va">standardize_race</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">racecol</span> <span class="op">=</span> <span class="st">"race"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">racecol</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Column"</span>, <span class="va">racecol</span>, <span class="st">"not found in data"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">x</span><span class="op">$</span><span class="va">.race_standardized</span> <span class="op">&lt;-</span> <span class="fu">rpkgdemo</span><span class="fu">::</span><span class="va"><a href="../reference/racemap.html">racemap</a></span><span class="op">[</span><span class="va">x</span><span class="op">[[</span><span class="va">racecol</span><span class="op">]</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Document, rebuild, check, then try it out.</p>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Generate some fake data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">mydata</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>reported_race<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">racemap</span><span class="op">)</span>, <span class="fl">20</span>, replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mydata</span><span class="op">$</span><span class="va">reported_race</span><span class="op">[</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"Martian"</span></span>
+<span><span class="va">mydata</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20 × 1</span></span></span>
+<span><span class="co">#&gt;    reported_race                         </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> White                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Other                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> R4                                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Native American/Alaskan Native        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> R3                                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> UNK                                   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Native Hawaiian/Other Pacific Islander</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Asian                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> More Than One Race                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> R4                                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Asian                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Other                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> Black or African American             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> Native American/Alaskan Native        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span> Martian                               </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span> Black/African American                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span> R3                                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span> Black or African American             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">19</span> Other                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">20</span> R1</span></span>
+<span></span>
+<span><span class="co"># Now standardize that race data</span></span>
+<span><span class="va">mydata</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span>racecol<span class="op">=</span><span class="st">"reported_race"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20 × 2</span></span></span>
+<span><span class="co">#&gt;    reported_race                          .race_standardized                    </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> White                                  White                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Other                                  Other                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> R4                                     Native Hawaiian/Other Pacific Islander</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Native American/Alaskan Native         American Indian/Alaska Native         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> R3                                     Black/African American                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> UNK                                    Unknown                               </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Native Hawaiian/Other Pacific Islander Native Hawaiian/Other Pacific Islander</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Asian                                  Asian                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> More Than One Race                     Multiracial                           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> R4                                     Native Hawaiian/Other Pacific Islander</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Asian                                  Asian                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Other                                  Other                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> Black or African American              Black/African American                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> Native American/Alaskan Native         American Indian/Alaska Native         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span> Martian                                <span style="color: #BB0000;">NA</span>                                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span> Black/African American                 Black/African American                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span> R3                                     Black/African American                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span> Black or African American              Black/African American                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">19</span> Other                                  Other                                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">20</span> R1                                     American Indian/Alaska Native</span></span></code></pre></div>
+<p>Finally, we can write some tests for this function. These tests were
+written wholly by Positron Assitant using Claude Sonnet 4.5.</p>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">test_that</span><span class="op">(</span><span class="st">"standardize_race"</span>, <span class="op">{</span></span>
+<span>  <span class="co"># standardize_race adds .race_standardized column</span></span>
+<span>  <span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"White"</span>, <span class="st">"Black"</span>, <span class="st">"Asian"</span><span class="op">)</span>,</span>
+<span>    other_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_true</span><span class="op">(</span><span class="st">".race_standardized"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># standardize_race works with custom column name</span></span>
+<span>  <span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    reported_race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"White"</span>, <span class="st">"Black"</span>, <span class="st">"Asian"</span><span class="op">)</span>,</span>
+<span>    other_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span><span class="va">test_data</span>, racecol <span class="op">=</span> <span class="st">"reported_race"</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_true</span><span class="op">(</span><span class="st">".race_standardized"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># standardize_race uses racemap correctly</span></span>
+<span>  <span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu">rpkgdemo</span><span class="fu">::</span><span class="va"><a href="../reference/racemap.html">racemap</a></span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span></span>
+<span>    <span class="va">result</span><span class="op">$</span><span class="va">.race_standardized</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu">rpkgdemo</span><span class="fu">::</span><span class="va"><a href="../reference/racemap.html">racemap</a></span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu">rpkgdemo</span><span class="fu">::</span><span class="va"><a href="../reference/racemap.html">racemap</a></span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># standardize_race handles unmapped values with NA</span></span>
+<span>  <span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"White"</span>, <span class="st">"Martian"</span>, <span class="st">"Klingon"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_true</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">.race_standardized</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_true</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">.race_standardized</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="co"># standardize_race throws error when column not found</span></span>
+<span>  <span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    other_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="fu">expect_error</span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Column race not found in data"</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># standardize_race throws error with custom column not found</span></span>
+<span>  <span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"White"</span>, <span class="st">"Black"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="fu">expect_error</span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span><span class="va">test_data</span>, racecol <span class="op">=</span> <span class="st">"nonexistent"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Column nonexistent not found in data"</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># standardize_race preserves original columns</span></span>
+<span>  <span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"White"</span>, <span class="st">"Black"</span><span class="op">)</span>,</span>
+<span>    id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standardize_race.html">standardize_race</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">race</span>, <span class="va">test_data</span><span class="op">$</span><span class="va">race</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">id</span>, <span class="va">test_data</span><span class="op">$</span><span class="va">id</span><span class="op">)</span></span>
+<span>  <span class="fu">expect_equal</span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">value</span>, <span class="va">test_data</span><span class="op">$</span><span class="va">value</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>Let’s test and check:</p>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code>ℹ Testing rpkgdemo
+✔ | F W  S  OK | Context
+✔ |         36 | utils
+══ Results ═══════════════════════════
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 36 ]
+
+🌈 Your tests are over the rainbow 🌈</code></pre>
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">covr</span><span class="fu">::</span><span class="fu">package_coverage</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code>rpkgdemo Coverage: 100.00%
+R/utils.R: 100.00%</code></pre>
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code>── R CMD check results ── rpkgdemo 0.0.0.9000 ──
+Duration: 11.9s
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔</code></pre>
+</div>
+<div class="section level2">
 <h2 id="readme-rmd">README.Rmd<a class="anchor" aria-label="anchor" href="#readme-rmd"></a>
 </h2>
 <p>The README file is the first thing people see when they visit your
@@ -1163,12 +1477,12 @@ formatted text, code chunks, and output. You’ll name the file
 <code>README.md</code>, which is what GitHub displays. To create a
 README.Rmd file, you can use the <code>usethis::use_readme_rmd()</code>
 function.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_readme_rmd</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Then use <code>devtools::build_readme()</code> to render it. Besides
 just running knitr to render the file, it installs a temporary copy of
 the package then renders the README.Rmd in a clean session.</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">build_readme</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -1182,7 +1496,7 @@ necessary YAML files in the <code>.github/workflows/</code> directory of
 your package to run a package check whenever (1) you push or merge to
 the main branch, or (2) you open up a pull request to the main branch
 from any development branch.</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_github_action</span><span class="op">(</span><span class="st">"check-release"</span><span class="op">)</span></span></code></pre></div>
 <pre><code>✔ Setting active project to "/Users/sdt5z/repos/rpkgdemo".
 ✔ Creating .github/.
@@ -1217,16 +1531,16 @@ merge into main!</p>
 for your R package. The website can include function reference,
 vignettes, articles, and more. You can set up <code>pkgdown</code> for
 your package using the <code>usethis::use_pkgdown()</code> function.</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_pkgdown</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Before you render your site, make sure your README is up to date.</p>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">build_readme</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Now, you can build the site with <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code>.
 This builds a complete website by rendering the home page from the
 README, function reference from the docs, articles from your vignettes,
 NEWS files, LLM docs, and more.</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">pkgdown</span><span class="fu">::</span><span class="fu"><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">build_site</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>See the pkgdown website for this package:</p>
 <ul>
@@ -1251,7 +1565,7 @@ example:</p>
 </ul>
 <p>Finally, you can automate the deployment of your pkgdown website with
 yet another GitHub Action: And the vignette here:</p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_pkgdown_github_pages</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code>✔ Writing _pkgdown.yml.
 ☐ Modify _pkgdown.yml.
@@ -1280,7 +1594,7 @@ Markdown file for your vignette. If you name the vignette the same name
 as your package (“rpkgdemo” here), it will be the main vignette that
 shows up first in your pkgdown site. Others show up under the “articles”
 section. See <a href="https://dplyr.tidyverse.org/" class="external-link uri">https://dplyr.tidyverse.org/</a> for an example.</p>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_vignette</span><span class="op">(</span><span class="st">"rpkgdemo"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -1289,7 +1603,7 @@ section. See <a href="https://dplyr.tidyverse.org/" class="external-link uri">ht
 <p>You can create a basic <code>NEWS.md</code> file with
 <code>usethis::use_news_md()</code>. This also adds a link and new
 Changelog page in your pkgdown site.</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">usethis</span><span class="fu">::</span><span class="fu">use_news_md</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -1326,7 +1640,7 @@ can help with this. It’ll take you through a series of questions and
 then submit your source package to CRAN. You might want to check out <a href="https://github.com/DavisVaughan/extrachecks" class="external-link">DavisVaughan/extrachecks</a>
 for information about additional ad-hoc checks that the CRAN maintainers
 run that aren’t checked by <code>devtools::check()</code>.</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">release</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -1348,7 +1662,7 @@ resource for building R packages.</p>
 <div class="section level2">
 <h2 id="session-information">Session Information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
@@ -1380,9 +1694,9 @@ resource for building R packages.</p>
 <span><span class="co">#&gt; [13] rmarkdown_2.30    tibble_3.3.0      evaluate_1.0.5    jquerylib_0.1.4  </span></span>
 <span><span class="co">#&gt; [17] fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.4   compiler_4.5.2   </span></span>
 <span><span class="co">#&gt; [21] fs_1.6.6          pkgconfig_2.0.3   systemfonts_1.3.1 digest_0.6.39    </span></span>
-<span><span class="co">#&gt; [25] R6_2.6.1          tidyselect_1.2.1  pillar_1.11.1     magrittr_2.0.4   </span></span>
-<span><span class="co">#&gt; [29] bslib_0.9.0       tools_4.5.2       pkgdown_2.2.0     cachem_1.1.0     </span></span>
-<span><span class="co">#&gt; [33] desc_1.4.3</span></span></code></pre></div>
+<span><span class="co">#&gt; [25] R6_2.6.1          utf8_1.2.6        tidyselect_1.2.1  pillar_1.11.1    </span></span>
+<span><span class="co">#&gt; [29] magrittr_2.0.4    bslib_0.9.0       tools_4.5.2       pkgdown_2.2.0    </span></span>
+<span><span class="co">#&gt; [33] cachem_1.1.0      desc_1.4.3</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -33,7 +33,8 @@ install.packages(c(
   "stringr",
   "covr", 
   "DT", 
-  "htmltools"
+  "htmltools", 
+  "here"
 ))
 ```
 
@@ -177,6 +178,15 @@ git push -u origin main
 Open up the command pallette and run `Developer: Reload window`.
 
 And take note of your GitHub repo URL. We’ll need it shortly.
+
+A note about `.gitignore`: You can create one yourself, or use
+`usethis::git_vaccinate()`, which adds `.Rproj.user`, `.Rhistory`,
+`.Rdata`, `.httr-oauth`, `.DS_Store`, and `.quarto` to your global
+(a.k.a. user-level) `.gitignore`. This is good practice as it decreases
+the chance that you will accidentally leak credentials to GitHub.
+git_vaccinate() also tries to detect and fix the situation where you
+have a global gitignore file, but it’s missing from your global Git
+config.
 
 ### The `DESCRIPTION` file
 
@@ -1229,6 +1239,343 @@ Make sure to document, build, and check one last time to ensure
 everything is working. Notice now when you run a `devtools::check()` it
 automatically runs all the tests in the package!
 
+## Recap: data + functions + tests
+
+Let’s put together everything we’ve done so far to (1) create a function
+that (2) relies on internal package data that’s (3) built from
+`data-raw` using a script.
+
+Imagine we want to to create a function to harmonize different
+representations of race or ethnicity up to a smaller set of broad
+categories. E.g., “Black/African American,” “Black,” and “Black or
+African American” all rolled up to “Black/African American”; or “Native
+Hawaiian/Other Pacific Islander,” “NH/PI,” or “Native Hawaiian/Pacific
+Islander” up to “Native Hawaiian/Other Pacific Islander.” We could
+construct some complex function for this:
+
+``` r
+data |>
+  mutate(
+    race_harmonized = case_when(
+      .data$race %in% c("abc", "def", "ghi") ~ "harmonized category 1",
+      .data$race %in% c("jkl", "mno", "pqr") ~ "harmonized category 2",
+      .data$race %in% c("stu", "vwx", "yz1") ~ "harmonized category 3",
+    )
+  )
+```
+
+But now we’re tangling the logic of the function (`mutate` and
+`case_when` for recoding) with the actual data (the various
+representations of race entries and their corresponding rolled up high
+level class). And, perhaps we want to update this mapping over time as
+we encounter new representations. A better way to do this is to create a
+CSV file in `data-raw/` that contains the mapping, read that into the
+package as internal data, then have the function read from that internal
+data to do the harmonization. Let’s do that.
+
+First, create a CSV file that looks something like this. We have `orace`
+(“original race”) and `hrace` (“harmonized race”).
+
+``` r
+read.csv(here::here("data-raw/racemap.csv")) |> 
+  knitr::kable()
+```
+
+Now, save this CSV file in `data-raw/`.
+
+In `data-raw/DATASET.R`, add code to read in this CSV file and save it
+as internal data in the package.
+
+``` r
+racemap <- readr::read_csv(here::here("data-raw/racemap.csv"), col_types = "cc")
+racemap <- tibble::deframe(racemap)
+usethis::use_data(racemap, overwrite = TRUE)
+```
+
+And document it in `R/data.R`:
+
+``` r
+#' Race mapping
+#'
+#' A named character vector mapping various race categories to a harmonized variable
+#'
+#' @format A named character vector.
+#'
+#' @examples
+#' racemap
+#' racemap["AI/AN"]
+#' racemap["Black"]
+#' racemap["Doesn't exist in the mapping"]
+#' table(racemap)
+#'
+"racemap"
+```
+
+Take a look at that object. It’s a named character vector.
+
+``` r
+racemap
+#>            American Indian/Alaska Native 
+#>          "American Indian/Alaska Native" 
+#>                                    AI/AN 
+#>          "American Indian/Alaska Native" 
+#>           Native American/Alaskan Native 
+#>          "American Indian/Alaska Native" 
+#>                                       R1 
+#>          "American Indian/Alaska Native" 
+#>                                    Asian 
+#>                                  "Asian" 
+#>                                       R2 
+#>                                  "Asian" 
+#>                   Black/African American 
+#>                 "Black/African American" 
+#>                                    Black 
+#>                 "Black/African American" 
+#>                Black or African American 
+#>                 "Black/African American" 
+#>                                       R3 
+#>                 "Black/African American" 
+#>   Native Hawaiian/Other Pacific Islander 
+#> "Native Hawaiian/Other Pacific Islander" 
+#>                                    NH/PI 
+#> "Native Hawaiian/Other Pacific Islander" 
+#>         Native Hawaiian/Pacific Islander 
+#> "Native Hawaiian/Other Pacific Islander" 
+#>                                       R4 
+#> "Native Hawaiian/Other Pacific Islander" 
+#>                                    White 
+#>                                  "White" 
+#>                                       R5 
+#>                                  "White" 
+#>                                  Unknown 
+#>                                "Unknown" 
+#>                                      UNK 
+#>                                "Unknown" 
+#>                                    Other 
+#>                                  "Other" 
+#>                       More Than One Race 
+#>                            "Multiracial" 
+#>                               Multi-race 
+#>                            "Multiracial"
+racemap["AI/AN"]
+#>                           AI/AN 
+#> "American Indian/Alaska Native"
+racemap["Black"]
+#>                    Black 
+#> "Black/African American"
+racemap["Doesn't exist in the mapping"]
+#> <NA> 
+#>   NA
+table(racemap)
+#> racemap
+#>          American Indian/Alaska Native                                  Asian 
+#>                                      4                                      2 
+#>                 Black/African American                            Multiracial 
+#>                                      4                                      2 
+#> Native Hawaiian/Other Pacific Islander                                  Other 
+#>                                      4                                      1 
+#>                                Unknown                                  White 
+#>                                      2                                      2
+```
+
+Now we can write a function that harmonizes a race variable in a data
+frame in `R/utils.R`. Notice how we reference the `racemap` object from
+the package namespace with
+[`rpkgdemo::racemap`](https://stephenturner.github.io/rpkgdemo/reference/racemap.md),
+and we’re simply using that named vector to do the harmonization. We
+pass the data frame to the function along with the name of the original
+race columnn in the data frame. The function adds a new column called
+`.race_standardized`. Prefixing variables added by functions with a dot
+is a common convention to avoid overwriting an existing variable that
+might be called `race_standardized`.
+
+``` r
+#' Standardize race variable
+#'
+#' @param x A data frame containing a race column to harmonize
+#' @param racecol The name of the race column. Default is "race".
+#'
+#' @returns A new data frame with an additional `.race_standardized` column
+#' @export
+#'
+#' @seealso [racemap]
+#'
+#' @examples
+#' set.seed(123)
+#' mydata <- data.frame(reported_race=sample(names(racemap), 20, replace=TRUE))
+#' mydata$reported_race[15] <- "Martian"
+#' mydata
+#' standardize_race(mydata, racecol="reported_race")
+#'
+standardize_race <- function(x, racecol = "race") {
+  if (!racecol %in% names(x)) {
+    stop(paste("Column", racecol, "not found in data"))
+  }
+  x$.race_standardized <- rpkgdemo::racemap[x[[racecol]]]
+  return(x)
+}
+```
+
+Document, rebuild, check, then try it out.
+
+``` r
+# Generate some fake data
+set.seed(123)
+mydata <- tibble::tibble(reported_race=sample(names(racemap), 20, replace=TRUE))
+mydata$reported_race[15] <- "Martian"
+mydata
+#> # A tibble: 20 × 1
+#>    reported_race                         
+#>    <chr>                                 
+#>  1 White                                 
+#>  2 Other                                 
+#>  3 R4                                    
+#>  4 Native American/Alaskan Native        
+#>  5 R3                                    
+#>  6 UNK                                   
+#>  7 Native Hawaiian/Other Pacific Islander
+#>  8 Asian                                 
+#>  9 More Than One Race                    
+#> 10 R4                                    
+#> 11 Asian                                 
+#> 12 Other                                 
+#> 13 Black or African American             
+#> 14 Native American/Alaskan Native        
+#> 15 Martian                               
+#> 16 Black/African American                
+#> 17 R3                                    
+#> 18 Black or African American             
+#> 19 Other                                 
+#> 20 R1
+
+# Now standardize that race data
+mydata |> 
+  standardize_race(racecol="reported_race")
+#> # A tibble: 20 × 2
+#>    reported_race                          .race_standardized                    
+#>    <chr>                                  <chr>                                 
+#>  1 White                                  White                                 
+#>  2 Other                                  Other                                 
+#>  3 R4                                     Native Hawaiian/Other Pacific Islander
+#>  4 Native American/Alaskan Native         American Indian/Alaska Native         
+#>  5 R3                                     Black/African American                
+#>  6 UNK                                    Unknown                               
+#>  7 Native Hawaiian/Other Pacific Islander Native Hawaiian/Other Pacific Islander
+#>  8 Asian                                  Asian                                 
+#>  9 More Than One Race                     Multiracial                           
+#> 10 R4                                     Native Hawaiian/Other Pacific Islander
+#> 11 Asian                                  Asian                                 
+#> 12 Other                                  Other                                 
+#> 13 Black or African American              Black/African American                
+#> 14 Native American/Alaskan Native         American Indian/Alaska Native         
+#> 15 Martian                                NA                                    
+#> 16 Black/African American                 Black/African American                
+#> 17 R3                                     Black/African American                
+#> 18 Black or African American              Black/African American                
+#> 19 Other                                  Other                                 
+#> 20 R1                                     American Indian/Alaska Native
+```
+
+Finally, we can write some tests for this function. These tests were
+written wholly by Positron Assitant using Claude Sonnet 4.5.
+
+``` r
+test_that("standardize_race", {
+  # standardize_race adds .race_standardized column
+  test_data <- data.frame(
+    race = c("White", "Black", "Asian"),
+    other_col = c(1, 2, 3)
+  )
+  result <- standardize_race(test_data)
+  expect_true(".race_standardized" %in% names(result))
+  expect_equal(ncol(result), 3)
+
+  # standardize_race works with custom column name
+  test_data <- data.frame(
+    reported_race = c("White", "Black", "Asian"),
+    other_col = c(1, 2, 3)
+  )
+  result <- standardize_race(test_data, racecol = "reported_race")
+  expect_true(".race_standardized" %in% names(result))
+
+  # standardize_race uses racemap correctly
+  test_data <- data.frame(
+    race = names(rpkgdemo::racemap)[1:3]
+  )
+  result <- standardize_race(test_data)
+  expect_equal(
+    result$.race_standardized,
+    unname(rpkgdemo::racemap[names(rpkgdemo::racemap)[1:3]])
+  )
+
+  # standardize_race handles unmapped values with NA
+  test_data <- data.frame(
+    race = c("White", "Martian", "Klingon")
+  )
+  result <- standardize_race(test_data)
+  expect_true(is.na(result$.race_standardized[2]))
+  expect_true(is.na(result$.race_standardized[3]))
+  # standardize_race throws error when column not found
+  test_data <- data.frame(
+    other_col = c(1, 2, 3)
+  )
+  expect_error(
+    standardize_race(test_data),
+    "Column race not found in data"
+  )
+
+  # standardize_race throws error with custom column not found
+  test_data <- data.frame(
+    race = c("White", "Black")
+  )
+  expect_error(
+    standardize_race(test_data, racecol = "nonexistent"),
+    "Column nonexistent not found in data"
+  )
+
+  # standardize_race preserves original columns
+  test_data <- data.frame(
+    race = c("White", "Black"),
+    id = c(1, 2),
+    value = c(10, 20)
+  )
+  result <- standardize_race(test_data)
+  expect_equal(result$race, test_data$race)
+  expect_equal(result$id, test_data$id)
+  expect_equal(result$value, test_data$value)
+})
+```
+
+Let’s test and check:
+
+``` r
+devtools::test()
+```
+
+    ℹ Testing rpkgdemo
+    ✔ | F W  S  OK | Context
+    ✔ |         36 | utils
+    ══ Results ═══════════════════════════
+    [ FAIL 0 | WARN 0 | SKIP 0 | PASS 36 ]
+
+    🌈 Your tests are over the rainbow 🌈
+
+``` r
+covr::package_coverage()
+```
+
+    rpkgdemo Coverage: 100.00%
+    R/utils.R: 100.00%
+
+``` r
+devtools::check()
+```
+
+    ── R CMD check results ── rpkgdemo 0.0.0.9000 ──
+    Duration: 11.9s
+
+    0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
 ## README.Rmd
 
 The README file is the first thing people see when they visit your
@@ -1482,7 +1829,7 @@ sessionInfo()
 #> [13] rmarkdown_2.30    tibble_3.3.0      evaluate_1.0.5    jquerylib_0.1.4  
 #> [17] fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.4   compiler_4.5.2   
 #> [21] fs_1.6.6          pkgconfig_2.0.3   systemfonts_1.3.1 digest_0.6.39    
-#> [25] R6_2.6.1          tidyselect_1.2.1  pillar_1.11.1     magrittr_2.0.4   
-#> [29] bslib_0.9.0       tools_4.5.2       pkgdown_2.2.0     cachem_1.1.0     
-#> [33] desc_1.4.3
+#> [25] R6_2.6.1          utf8_1.2.6        tidyselect_1.2.1  pillar_1.11.1    
+#> [29] magrittr_2.0.4    bslib_0.9.0       tools_4.5.2       pkgdown_2.2.0    
+#> [33] cachem_1.1.0      desc_1.4.3
 ```
