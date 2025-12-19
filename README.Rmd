@@ -21,10 +21,11 @@ knitr::opts_chunk$set(
 
 This rpkgdemo package serves as a demonstration of how to structure an R package. View the full tutorial in the vignette: `vignette("rpkgdemo")`.
 
-To follow along the full tutorial you'll need the following packages installed:
+To follow along the full tutorial you'll need [**R**](https://www.r-project.org/), [**Positron**](https://positron.posit.co/), [**RTools**](https://cran.r-project.org/bin/windows/Rtools/) (if you're on Windows), the following packages installed:
 
 ```{r, eval=FALSE}
 install.packages(c(
+  "pak",
   "usethis",
   "devtools",
   "roxygen2",
