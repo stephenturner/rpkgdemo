@@ -6,19 +6,19 @@ demonstrate building an R package using Positron IDE.
 
 ## Setup
 
-### Positron
+### R and Positron
 
 To follow along during the live workshop, you’ll need to do a few things
 to get set up.
 
-First, you’ll need to install [R](https://www.r-project.org/) and
-[Positron](https://positron.posit.co/).
+First, you’ll need to install [**R**](https://www.r-project.org/) and
+[**Positron**](https://positron.posit.co/).
 
-To follow along the full tutorial you’ll need the following packages
-installed:
+You’ll also need the following packages installed:
 
 ``` r
 install.packages(c(
+  "pak",
   "usethis",
   "devtools",
   "roxygen2",
@@ -38,10 +38,15 @@ install.packages(c(
 ))
 ```
 
+And if you’re a Windows user, you’ll also neet to install
+[**RTools**](https://cran.r-project.org/bin/windows/Rtools/) for
+whatever version of R you’re using (e.g. RTools 4.5 for R versions
+4.5.x).
+
 ### Git and GitHub
 
-You’ll also want to make sure git is installed on your system, and that
-you have a GitHub account set up. I also recommend setting up an SSH key
+Make sure git is installed on your system, and that you have a GitHub
+account set up. I also recommend setting up an SSH key
 (<https://github.com/settings/keys>) for pushing code to GitHub.
 
 ### Air

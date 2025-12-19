@@ -71,15 +71,15 @@ demonstrate building an R package using Positron IDE.</p>
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
 <div class="section level3">
-<h3 id="positron">Positron<a class="anchor" aria-label="anchor" href="#positron"></a>
+<h3 id="r-and-positron">R and Positron<a class="anchor" aria-label="anchor" href="#r-and-positron"></a>
 </h3>
 <p>To follow along during the live workshop, you’ll need to do a few
 things to get set up.</p>
-<p>First, you’ll need to install <a href="https://www.r-project.org/" class="external-link">R</a> and <a href="https://positron.posit.co/" class="external-link">Positron</a>.</p>
-<p>To follow along the full tutorial you’ll need the following packages
-installed:</p>
+<p>First, you’ll need to install <a href="https://www.r-project.org/" class="external-link"><strong>R</strong></a> and <a href="https://positron.posit.co/" class="external-link"><strong>Positron</strong></a>.</p>
+<p>You’ll also need the following packages installed:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"pak"</span>,</span>
 <span>  <span class="st">"usethis"</span>,</span>
 <span>  <span class="st">"devtools"</span>,</span>
 <span>  <span class="st">"roxygen2"</span>,</span>
@@ -97,13 +97,15 @@ installed:</p>
 <span>  <span class="st">"htmltools"</span>,</span>
 <span>  <span class="st">"here"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>And if you’re a Windows user, you’ll also neet to install <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link"><strong>RTools</strong></a>
+for whatever version of R you’re using (e.g. RTools 4.5 for R versions
+4.5.x).</p>
 </div>
 <div class="section level3">
 <h3 id="git-and-github">Git and GitHub<a class="anchor" aria-label="anchor" href="#git-and-github"></a>
 </h3>
-<p>You’ll also want to make sure git is installed on your system, and
-that you have a GitHub account set up. I also recommend setting up an
-SSH key (<a href="https://github.com/settings/keys" class="external-link uri">https://github.com/settings/keys</a>) for pushing code to
+<p>Make sure git is installed on your system, and that you have a GitHub
+account set up. I also recommend setting up an SSH key (<a href="https://github.com/settings/keys" class="external-link uri">https://github.com/settings/keys</a>) for pushing code to
 GitHub.</p>
 </div>
 <div class="section level3">
