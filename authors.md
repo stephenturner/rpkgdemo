@@ -10,13 +10,13 @@
 Source:
 [`DESCRIPTION`](https://github.com/stephenturner/rpkgdemo/blob/main/DESCRIPTION)
 
-Turner S (2025). *rpkgdemo: A demo package for building R packages*. R
+Turner S (2026). *rpkgdemo: A demo package for building R packages*. R
 package version 1.0.0, <https://github.com/stephenturner/rpkgdemo>.
 
     @Manual{,
       title = {rpkgdemo: A demo package for building R packages},
       author = {Stephen Turner},
-      year = {2025},
+      year = {2026},
       note = {R package version 1.0.0},
       url = {https://github.com/stephenturner/rpkgdemo},
     }

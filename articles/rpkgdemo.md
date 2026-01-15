@@ -284,7 +284,8 @@ suppress_counts(c(1, 3, 5, 7, 9))
 suppress_counts(c(10, 20, 3, 4, 5), threshold = 10)
 #> [1] 10 20 NA NA NA
 suppress_counts(c("a", "b", "c"))
-#> Error in suppress_counts(c("a", "b", "c")): Input x must be numeric.
+#> Error in `suppress_counts()`:
+#> ! Input x must be numeric.
 ```
 
 Now we need to document our function using special “roxygen comments” so
@@ -588,7 +589,8 @@ Document and build the package again and try the function out.
 standardize_sex(c("Male", "f", "Trans female", "nonbinary", "unknown", NA))
 #> [1] "M" "F" "O" "O" "U" "U"
 standardize_sex(c(1, 2, 1, 2))
-#> Error in standardize_sex(c(1, 2, 1, 2)): Input x must be a character vector.
+#> Error in `standardize_sex()`:
+#> ! Input x must be a character vector.
 ```
 
 But now run a check (cmd+shift+E) and you’ll see an error:
@@ -878,10 +880,11 @@ access from our function.
 Go back into your `data-raw/DATASET.R` file and add this to the very end
 of the data generation script you have.
 
-If you’ve never used `here::here()` before, it’s a great way to create
-file paths relative to the root of your project, regardless of your
-working directory. It looks for a `.git` directory or a `DESCRIPTION`
-file. Try it.
+If you’ve never used
+[`here::here()`](https://here.r-lib.org/reference/here.html) before,
+it’s a great way to create file paths relative to the root of your
+project, regardless of your working directory. It looks for a `.git`
+directory or a `DESCRIPTION` file. Try it.
 
 ``` r
 # Write as installed data
@@ -1276,13 +1279,33 @@ CSV file in `data-raw/` that contains the mapping, read that into the
 package as internal data, then have the function read from that internal
 data to do the harmonization. Let’s do that.
 
-First, create a CSV file that looks something like this. We have `orace`
-(“original race”) and `hrace` (“harmonized race”).
+First, create a CSV file that looks something like this (or [download it
+here](https://github.com/stephenturner/rpkgdemo/blob/main/data-raw/racemap.csv)).
+We have `orace` (“original race”) and `hrace` (“harmonized race”).
 
-``` r
-read.csv(here::here("data-raw/racemap.csv")) |>
-  knitr::kable()
-```
+|                                        | x                                      |
+|:---------------------------------------|:---------------------------------------|
+| American Indian/Alaska Native          | American Indian/Alaska Native          |
+| AI/AN                                  | American Indian/Alaska Native          |
+| Native American/Alaskan Native         | American Indian/Alaska Native          |
+| R1                                     | American Indian/Alaska Native          |
+| Asian                                  | Asian                                  |
+| R2                                     | Asian                                  |
+| Black/African American                 | Black/African American                 |
+| Black                                  | Black/African American                 |
+| Black or African American              | Black/African American                 |
+| R3                                     | Black/African American                 |
+| Native Hawaiian/Other Pacific Islander | Native Hawaiian/Other Pacific Islander |
+| NH/PI                                  | Native Hawaiian/Other Pacific Islander |
+| Native Hawaiian/Pacific Islander       | Native Hawaiian/Other Pacific Islander |
+| R4                                     | Native Hawaiian/Other Pacific Islander |
+| White                                  | White                                  |
+| R5                                     | White                                  |
+| Unknown                                | Unknown                                |
+| UNK                                    | Unknown                                |
+| Other                                  | Other                                  |
+| More Than One Race                     | Multiracial                            |
+| Multi-race                             | Multiracial                            |
 
 Now, save this CSV file in `data-raw/`.
 
@@ -1828,11 +1851,11 @@ sessionInfo()
 #> [1] dplyr_1.1.4    rpkgdemo_1.0.0
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] vctrs_0.6.5       cli_3.6.5         knitr_1.50        rlang_1.1.6      
+#>  [1] vctrs_0.6.5       cli_3.6.5         knitr_1.51        rlang_1.1.7      
 #>  [5] xfun_0.55         generics_0.1.4    textshaping_1.0.4 jsonlite_2.0.0   
 #>  [9] glue_1.8.0        htmltools_0.5.9   ragg_1.5.0        sass_0.4.10      
-#> [13] rmarkdown_2.30    tibble_3.3.0      evaluate_1.0.5    jquerylib_0.1.4  
-#> [17] fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.4   compiler_4.5.2   
+#> [13] rmarkdown_2.30    tibble_3.3.1      evaluate_1.0.5    jquerylib_0.1.4  
+#> [17] fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.5   compiler_4.5.2   
 #> [21] fs_1.6.6          pkgconfig_2.0.3   systemfonts_1.3.1 digest_0.6.39    
 #> [25] R6_2.6.1          utf8_1.2.6        tidyselect_1.2.1  pillar_1.11.1    
 #> [29] magrittr_2.0.4    bslib_0.9.0       tools_4.5.2       pkgdown_2.2.0    
