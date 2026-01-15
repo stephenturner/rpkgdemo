@@ -1102,7 +1102,7 @@ First, create a CSV file that looks something like this (or [download it here](h
 ```{r, eval=TRUE, echo=FALSE}
 rpkgdemo::racemap |>
   tibble::enframe("orace", "hrace") |>
-  kable()
+  knitr::kable()
 ```
 
 Now, save this CSV file in `data-raw/`.
