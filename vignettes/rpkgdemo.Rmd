@@ -1097,9 +1097,9 @@ data |>
 
 But now we're tangling the logic of the function (`mutate` and `case_when` for recoding) with the actual data (the various representations of race entries and their corresponding rolled up high level class). And, perhaps we want to update this mapping over time as we encounter new representations. A better way to do this is to create a CSV file in `data-raw/` that contains the mapping, read that into the package as internal data, then have the function read from that internal data to do the harmonization. Let's do that. 
 
-First, create a CSV file that looks something like this. We have `orace` ("original race") and `hrace` ("harmonized race").
+First, create a CSV file that looks something like this (or [download it here](https://github.com/stephenturner/rpkgdemo/blob/main/data-raw/racemap.csv)). We have `orace` ("original race") and `hrace` ("harmonized race").
 
-```{r}
+```{r, eval=TRUE, echo=FALSE}
 read.csv(here::here("data-raw/racemap.csv")) |>
   knitr::kable()
 ```
