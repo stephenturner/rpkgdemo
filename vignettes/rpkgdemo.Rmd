@@ -1100,8 +1100,7 @@ But now we're tangling the logic of the function (`mutate` and `case_when` for r
 First, create a CSV file that looks something like this (or [download it here](https://github.com/stephenturner/rpkgdemo/blob/main/data-raw/racemap.csv)). We have `orace` ("original race") and `hrace` ("harmonized race").
 
 ```{r, eval=TRUE, echo=FALSE}
-read.csv(here::here("data-raw/racemap.csv")) |>
-  knitr::kable()
+rpkgdemo::racemap |> knitr::kable()
 ```
 
 Now, save this CSV file in `data-raw/`.
